@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start:dashboard": "python3 -m http.server 8080"
+    "start:dashboard": "uv run python reviewlens_server.py"
   },
   "devDependencies": {
     "prettier": "3.8.4"

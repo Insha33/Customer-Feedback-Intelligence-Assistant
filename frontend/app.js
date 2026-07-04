@@ -1,4 +1,4 @@
-const DATA_URL = "../data/instagram_reviews_rag.csv";
+const DATA_URL = "/data/instagram_reviews_rag.csv";
 
 const CATEGORY_ACTIONS = {
   "Account Suspension":
@@ -23,6 +23,19 @@ const SENTIMENT_COLORS = {
   positive: "#258f67",
 };
 
+const CATEGORY_COLORS = [
+  "#0f9f8f",
+  "#3b6eea",
+  "#d84a4a",
+  "#c9861a",
+  "#7c5cff",
+  "#258f67",
+  "#e56b8f",
+  "#3aa6b9",
+  "#8b6f47",
+  "#6b7280",
+];
+
 const state = {
   rows: [],
   filtered: [],
@@ -31,27 +44,31 @@ const state = {
   query: "",
 };
 
+function getElement(selector) {
+  const element = document.querySelector(selector);
+
+  if (!element) {
+    throw new Error(`Required dashboard element is missing: ${selector}`);
+  }
+
+  return element;
+}
+
 const els = {
-  sidebarTotal: document.querySelector("#sidebarTotal"),
-  summaryLine: document.querySelector("#summaryLine"),
-  categoryFilter: document.querySelector("#categoryFilter"),
-  sentimentFilter: document.querySelector("#sentimentFilter"),
-  searchInput: document.querySelector("#searchInput"),
-  criticalCount: document.querySelector("#criticalCount"),
-  criticalShare: document.querySelector("#criticalShare"),
-  topIssue: document.querySelector("#topIssue"),
-  topIssueShare: document.querySelector("#topIssueShare"),
-  avgRating: document.querySelector("#avgRating"),
-  ratingContext: document.querySelector("#ratingContext"),
-  qualityCount: document.querySelector("#qualityCount"),
-  categoryTotal: document.querySelector("#categoryTotal"),
-  categoryChart: document.querySelector("#categoryChart"),
-  sentimentChart: document.querySelector("#sentimentChart"),
-  ratingChart: document.querySelector("#ratingChart"),
-  sourceChart: document.querySelector("#sourceChart"),
-  backlogLanes: document.querySelector("#backlogLanes"),
-  visibleCount: document.querySelector("#visibleCount"),
-  reviewList: document.querySelector("#reviewList"),
+  categoryFilter: getElement("#categoryFilter"),
+  sentimentFilter: getElement("#sentimentFilter"),
+  searchInput: getElement("#searchInput"),
+  clearFilters: getElement("#clearFilters"),
+  criticalCount: getElement("#criticalCount"),
+  criticalShare: getElement("#criticalShare"),
+  topIssue: getElement("#topIssue"),
+  topIssueShare: getElement("#topIssueShare"),
+  avgRating: getElement("#avgRating"),
+  ratingContext: getElement("#ratingContext"),
+  categoryTotal: getElement("#categoryTotal"),
+  categoryChart: getElement("#categoryChart"),
+  sentimentChart: getElement("#sentimentChart"),
+  backlogLanes: getElement("#backlogLanes"),
 };
 
 function parseCsv(text) {
@@ -111,20 +128,11 @@ function parseCsv(text) {
 }
 
 function normalizeRow(row) {
-  const rating = Number(row.user_rating) || 0;
-  const quality = Number(row.quality_score) || 0;
-  const sentiment = (row.sentiment || "unknown").toLowerCase();
-  const severityScore =
-    (sentiment === "negative" ? 35 : sentiment === "neutral" ? 12 : 0) +
-    (rating > 0 ? (6 - rating) * 9 : 0) +
-    quality * 7;
-
   return {
     ...row,
-    user_rating: rating,
-    quality_score: quality,
-    sentiment,
-    severityScore,
+    user_rating: Number(row.user_rating) || 0,
+    quality_score: Number(row.quality_score) || 0,
+    sentiment: (row.sentiment || "unknown").toLowerCase(),
   };
 }
 
@@ -154,12 +162,6 @@ function topEntries(counts, limit = 10) {
     .slice(0, limit);
 }
 
-function severityLabel(row) {
-  if (row.severityScore >= 95) return "critical";
-  if (row.severityScore >= 72) return "high";
-  return "medium";
-}
-
 function applyFilters() {
   const query = state.query.trim().toLowerCase();
   state.filtered = state.rows.filter((row) => {
@@ -173,6 +175,7 @@ function applyFilters() {
         .join(" ")
         .toLowerCase()
         .includes(query);
+
     return categoryOk && sentimentOk && queryOk;
   });
 }
@@ -212,33 +215,36 @@ function setupFilters() {
     state.query = event.target.value;
     render();
   });
+  els.clearFilters.addEventListener("click", () => {
+    state.category = "All";
+    state.sentiment = "All";
+    state.query = "";
+    els.categoryFilter.value = state.category;
+    els.sentimentFilter.value = state.sentiment;
+    els.searchInput.value = "";
+    render();
+  });
 }
 
 function renderMetrics(rows) {
   const total = rows.length;
-  const allTotal = state.rows.length;
   const categoryCounts = countBy(rows, "category");
   const topCategory = topEntries(categoryCounts, 1)[0] || ["-", 0];
   const criticalRows = rows.filter(
     (row) => row.sentiment === "negative" && row.user_rating <= 2,
   );
-  const qualityRows = rows.filter((row) => row.quality_score >= 5);
   const avg = average(rows, "user_rating");
 
-  els.sidebarTotal.textContent = allTotal.toLocaleString();
-  els.summaryLine.textContent = `${total.toLocaleString()} matching reviews analyzed across category, sentiment, rating, source, and quality signals.`;
   els.criticalCount.textContent = criticalRows.length.toLocaleString();
-  els.criticalShare.textContent = `${pct(criticalRows.length, total)} of current view`;
+  els.criticalShare.textContent = `${pct(criticalRows.length, total)} require product or support action`;
   els.topIssue.textContent = topCategory[0];
   els.topIssueShare.textContent = `${topCategory[1].toLocaleString()} reviews, ${pct(
     topCategory[1],
     total,
   )}`;
   els.avgRating.textContent = avg ? avg.toFixed(1) : "-";
-  els.ratingContext.textContent = "out of 5 stars";
-  els.qualityCount.textContent = qualityRows.length.toLocaleString();
+  els.ratingContext.textContent = "average app-store rating";
   els.categoryTotal.textContent = `${total.toLocaleString()} reviews`;
-  els.visibleCount.textContent = `${total.toLocaleString()} shown`;
 }
 
 function renderCategoryChart(rows) {
@@ -247,19 +253,32 @@ function renderCategoryChart(rows) {
   const max = entries[0]?.[1] || 1;
 
   els.categoryChart.innerHTML = entries
-    .map(([category, count]) => {
+    .map(([category, count], index) => {
       const width = Math.max(4, (count / max) * 100);
+      const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+      const isActive = state.category === category;
+
       return `
-        <div class="bar-row">
+        <button class="bar-row ${isActive ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">
           <span class="bar-label" title="${escapeHtml(category)}">${escapeHtml(category)}</span>
           <span class="bar-track" aria-hidden="true">
-            <span class="bar-fill" style="width:${width}%"></span>
+            <span class="bar-fill" style="width:${width}%; background:${color}"></span>
           </span>
           <span class="bar-value">${pct(count, total)}</span>
-        </div>
+        </button>
       `;
     })
     .join("");
+
+  els.categoryChart.querySelectorAll("[data-category]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const selectedCategory = button.dataset.category;
+      state.category =
+        state.category === selectedCategory ? "All" : selectedCategory;
+      els.categoryFilter.value = state.category;
+      render();
+    });
+  });
 }
 
 function renderDonut(rows) {
@@ -298,13 +317,13 @@ function renderDonut(rows) {
   const legend = segments
     .map(
       (segment) => `
-        <div class="legend-item">
+        <button class="legend-item ${state.sentiment === segment.name ? "active" : ""}" type="button" data-sentiment="${segment.name}">
           <span class="legend-name">
             <span class="swatch" style="background:${segment.color}"></span>
             ${escapeHtml(segment.name)}
           </span>
           <span>${pct(segment.value, rows.length)}</span>
-        </div>
+        </button>
       `,
     )
     .join("");
@@ -318,39 +337,16 @@ function renderDonut(rows) {
     </svg>
     <div class="legend">${legend}</div>
   `;
-}
 
-function renderRatingChart(rows) {
-  const counts = countBy(rows, "user_rating");
-  const max = Math.max(...Object.values(counts), 1);
-  els.ratingChart.innerHTML = [1, 2, 3, 4, 5]
-    .map((rating) => {
-      const count = counts[rating] || 0;
-      return `
-        <div class="rating-row">
-          <span>${rating} star</span>
-          <span class="rating-track"><span class="rating-fill" style="width:${(count / max) * 100}%"></span></span>
-          <span>${count}</span>
-        </div>
-      `;
-    })
-    .join("");
-}
-
-function renderSourceChart(rows) {
-  const entries = topEntries(countBy(rows, "source"), 6);
-  const total = rows.length || 1;
-  els.sourceChart.innerHTML = entries
-    .map(
-      ([source, count]) => `
-        <div class="source-row">
-          <span>${escapeHtml(source.replace("_", " "))}</span>
-          <span class="source-track"><span class="source-fill" style="width:${(count / total) * 100}%"></span></span>
-          <span>${pct(count, rows.length)}</span>
-        </div>
-      `,
-    )
-    .join("");
+  els.sentimentChart.querySelectorAll("[data-sentiment]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const selectedSentiment = button.dataset.sentiment;
+      state.sentiment =
+        state.sentiment === selectedSentiment ? "All" : selectedSentiment;
+      els.sentimentFilter.value = state.sentiment;
+      render();
+    });
+  });
 }
 
 function categoryBacklog(rows) {
@@ -438,46 +434,12 @@ function renderBacklog(rows) {
     .join("");
 }
 
-function renderReviews(rows) {
-  const topReviews = [...rows]
-    .sort((a, b) => b.severityScore - a.severityScore)
-    .slice(0, 12);
-
-  if (!topReviews.length) {
-    els.reviewList.innerHTML = `<div class="empty-state">No reviews match the current filters.</div>`;
-    return;
-  }
-
-  els.reviewList.innerHTML = topReviews
-    .map((row) => {
-      const severity = severityLabel(row);
-      return `
-        <article class="review-row">
-          <span class="severity ${severity}">${severity}</span>
-          <div class="review-copy">
-            <strong>${escapeHtml(row.category || "Uncategorized")}</strong>
-            <p class="review-text">${escapeHtml(row.review_text || "")}</p>
-          </div>
-          <div class="review-meta">
-            <span>${escapeHtml(row.source || "unknown")}</span>
-            <span>${row.user_rating || "-"} star</span>
-            <span>${escapeHtml(row.review_date || "")}</span>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
-}
-
 function render() {
   applyFilters();
   renderMetrics(state.filtered);
   renderCategoryChart(state.filtered);
   renderDonut(state.filtered);
-  renderRatingChart(state.filtered);
-  renderSourceChart(state.filtered);
   renderBacklog(state.filtered);
-  renderReviews(state.filtered);
 }
 
 function escapeHtml(value) {
@@ -491,12 +453,20 @@ function escapeHtml(value) {
 
 async function init() {
   try {
-    const response = await fetch(DATA_URL);
+    const response = await fetch(DATA_URL, {
+      cache: "no-store",
+    });
     if (!response.ok) {
-      throw new Error(`Could not load ${DATA_URL}`);
+      throw new Error(`Could not load ${DATA_URL}: HTTP ${response.status}`);
     }
+
     const csv = await response.text();
     state.rows = parseCsv(csv).map(normalizeRow);
+
+    if (!state.rows.length) {
+      throw new Error("The review CSV loaded but did not contain any rows.");
+    }
+
     state.filtered = state.rows;
     setupFilters();
     render();

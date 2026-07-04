@@ -3,33 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Customer Feedback Intelligence</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <title>ReviewLens</title>
+    <link rel="stylesheet" href="./styles.css?v=20260705-rag-chat" />
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar" aria-label="Primary navigation">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">CF</span>
-          <span>Feedback Intel</span>
+          <span class="brand-mark" aria-hidden="true">RL</span>
+          <span>ReviewLens</span>
         </div>
         <nav class="nav-list">
           <a class="nav-item active" href="#overview">Overview</a>
           <a class="nav-item" href="#backlog">Backlog</a>
-          <a class="nav-item" href="#reviews">Reviews</a>
+          <a class="nav-item" href="./chat.html">Ask AI</a>
         </nav>
-        <div class="sidebar-note">
-          <span class="note-label">Dataset</span>
-          <strong id="sidebarTotal">-</strong>
-          <span>Instagram reviews</span>
-        </div>
       </aside>
 
       <main class="main">
         <header class="topbar">
           <div>
             <h1>Review Analysis</h1>
-            <p id="summaryLine">Loading customer feedback...</p>
           </div>
           <div class="controls" aria-label="Dashboard filters">
             <label>
@@ -49,29 +43,27 @@
                 autocomplete="off"
               />
             </label>
+            <button id="clearFilters" class="ghost-button" type="button">
+              Reset
+            </button>
           </div>
         </header>
 
         <section class="metrics-grid" aria-label="Key metrics">
           <article class="metric-card urgent">
-            <span class="metric-label">Critical negative reviews</span>
+            <span class="metric-label">Needs immediate attention</span>
             <strong id="criticalCount">-</strong>
             <span id="criticalShare">-</span>
           </article>
           <article class="metric-card">
-            <span class="metric-label">Top issue</span>
+            <span class="metric-label">Largest customer pain</span>
             <strong id="topIssue">-</strong>
             <span id="topIssueShare">-</span>
           </article>
           <article class="metric-card">
-            <span class="metric-label">Average rating</span>
+            <span class="metric-label">Satisfaction score</span>
             <strong id="avgRating">-</strong>
             <span id="ratingContext">-</span>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">High-quality signals</span>
-            <strong id="qualityCount">-</strong>
-            <span>quality score 5</span>
           </article>
         </section>
 
@@ -79,8 +71,8 @@
           <article class="panel large-panel">
             <div class="panel-header">
               <div>
-                <h2>Category Share</h2>
-                <p>Percentage of filtered reviews by issue category.</p>
+                <h2>Issue Category Breakdown</h2>
+                <p>Click a bar to focus the dashboard on that theme.</p>
               </div>
               <span id="categoryTotal" class="panel-stat">-</span>
             </div>
@@ -90,60 +82,29 @@
           <article class="panel">
             <div class="panel-header">
               <div>
-                <h2>Sentiment Mix</h2>
-                <p>Negative concentration is the urgency signal.</p>
+                <h2>Customer Mood</h2>
+                <p>Click a sentiment to isolate the emotional signal.</p>
               </div>
             </div>
             <div id="sentimentChart" class="donut-wrap"></div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <h2>Rating Pressure</h2>
-                <p>Low ratings indicate implementation priority.</p>
-              </div>
-            </div>
-            <div id="ratingChart" class="rating-chart"></div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <h2>Source Split</h2>
-                <p>Where feedback is coming from.</p>
-              </div>
-            </div>
-            <div id="sourceChart" class="source-chart"></div>
           </article>
         </section>
 
         <section id="backlog" class="panel backlog-panel">
           <div class="panel-header">
             <div>
-              <h2>Implementation Backlog</h2>
+              <h2>Product Backlog From Reviews</h2>
               <p>
-                Prioritized by category volume, negative sentiment, rating, and
-                signal quality.
+                Actions are ranked by complaint volume, negative sentiment, low
+                ratings, and signal quality.
               </p>
             </div>
           </div>
           <div id="backlogLanes" class="backlog-lanes"></div>
         </section>
-
-        <section id="reviews" class="panel reviews-panel">
-          <div class="panel-header">
-            <div>
-              <h2>Priority Review Queue</h2>
-              <p>Highest-severity reviews matching the current filters.</p>
-            </div>
-            <span id="visibleCount" class="panel-stat">-</span>
-          </div>
-          <div id="reviewList" class="review-list"></div>
-        </section>
       </main>
     </div>
 
-    <script src="./app.js" defer></script>
+    <script src="./app.js?v=20260705-rag-chat" defer></script>
   </body>
 </html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReviewLens Ask AI</title>
+    <link rel="stylesheet" href="./styles.css?v=20260705-rag-chat" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">RL</span>
+          <span>ReviewLens</span>
+        </div>
+        <nav class="nav-list">
+          <a class="nav-item" href="./">Overview</a>
+          <a class="nav-item" href="./#backlog">Backlog</a>
+          <a class="nav-item active" href="./chat.html">Ask AI</a>
+        </nav>
+      </aside>
+
+      <main class="main chat-main">
+        <section class="chat-layout" aria-label="Review intelligence chatbot">
+          <div class="chat-panel">
+            <header class="chat-header">
+              <div>
+                <h1>Ask ReviewLens</h1>
+                <p>
+                  Ask product questions and get answers grounded in the Qdrant
+                  review collection.
+                </p>
+              </div>
+              <span id="chatStatus" class="panel-stat">Hybrid RAG</span>
+            </header>
+
+            <div id="chatMessages" class="chat-messages" aria-live="polite">
+              <article class="message assistant">
+                <strong>ReviewLens</strong>
+                <p>
+                  Ask about the largest complaints, what to prioritize next, or
+                  why users are unhappy.
+                </p>
+              </article>
+            </div>
+
+            <form id="chatForm" class="chat-form">
+              <label class="sr-only" for="questionInput">Question</label>
+              <textarea
+                id="questionInput"
+                rows="3"
+                placeholder="Example: What should product fix first for account suspension complaints?"
+                required
+              ></textarea>
+              <button id="sendQuestion" type="submit">Ask</button>
+            </form>
+          </div>
+
+          <aside class="prompt-panel panel">
+            <h2>Useful prompts</h2>
+            <div class="prompt-list">
+              <button
+                type="button"
+                data-prompt="What are the top three product problems users mention most?"
+              >
+                Top problems
+              </button>
+              <button
+                type="button"
+                data-prompt="What should we put in the next sprint backlog based on review severity?"
+              >
+                Sprint backlog
+              </button>
+              <button
+                type="button"
+                data-prompt="Summarize the account suspension complaints and cite example reviews."
+              >
+                Account suspensions
+              </button>
+              <button
+                type="button"
+                data-prompt="Which issues look like support/process problems rather than engineering bugs?"
+              >
+                Support gaps
+              </button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <script src="./chat.js?v=20260705-rag-chat" defer></script>
+  </body>
+</html>
