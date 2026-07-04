@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Feedback Intelligence</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">CF</span>
+          <span>Feedback Intel</span>
+        </div>
+        <nav class="nav-list">
+          <a class="nav-item active" href="#overview">Overview</a>
+          <a class="nav-item" href="#backlog">Backlog</a>
+          <a class="nav-item" href="#reviews">Reviews</a>
+        </nav>
+        <div class="sidebar-note">
+          <span class="note-label">Dataset</span>
+          <strong id="sidebarTotal">-</strong>
+          <span>Instagram reviews</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h1>Review Analysis</h1>
+            <p id="summaryLine">Loading customer feedback...</p>
+          </div>
+          <div class="controls" aria-label="Dashboard filters">
+            <label>
+              Category
+              <select id="categoryFilter"></select>
+            </label>
+            <label>
+              Sentiment
+              <select id="sentimentFilter"></select>
+            </label>
+            <label>
+              Search
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Search reviews"
+                autocomplete="off"
+              />
+            </label>
+          </div>
+        </header>
+
+        <section class="metrics-grid" aria-label="Key metrics">
+          <article class="metric-card urgent">
+            <span class="metric-label">Critical negative reviews</span>
+            <strong id="criticalCount">-</strong>
+            <span id="criticalShare">-</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Top issue</span>
+            <strong id="topIssue">-</strong>
+            <span id="topIssueShare">-</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Average rating</span>
+            <strong id="avgRating">-</strong>
+            <span id="ratingContext">-</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">High-quality signals</span>
+            <strong id="qualityCount">-</strong>
+            <span>quality score 5</span>
+          </article>
+        </section>
+
+        <section id="overview" class="analysis-grid">
+          <article class="panel large-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Category Share</h2>
+                <p>Percentage of filtered reviews by issue category.</p>
+              </div>
+              <span id="categoryTotal" class="panel-stat">-</span>
+            </div>
+            <div id="categoryChart" class="bar-chart"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Sentiment Mix</h2>
+                <p>Negative concentration is the urgency signal.</p>
+              </div>
+            </div>
+            <div id="sentimentChart" class="donut-wrap"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Rating Pressure</h2>
+                <p>Low ratings indicate implementation priority.</p>
+              </div>
+            </div>
+            <div id="ratingChart" class="rating-chart"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Source Split</h2>
+                <p>Where feedback is coming from.</p>
+              </div>
+            </div>
+            <div id="sourceChart" class="source-chart"></div>
+          </article>
+        </section>
+
+        <section id="backlog" class="panel backlog-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Implementation Backlog</h2>
+              <p>
+                Prioritized by category volume, negative sentiment, rating, and
+                signal quality.
+              </p>
+            </div>
+          </div>
+          <div id="backlogLanes" class="backlog-lanes"></div>
+        </section>
+
+        <section id="reviews" class="panel reviews-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Priority Review Queue</h2>
+              <p>Highest-severity reviews matching the current filters.</p>
+            </div>
+            <span id="visibleCount" class="panel-stat">-</span>
+          </div>
+          <div id="reviewList" class="review-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>

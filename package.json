@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start:dashboard": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "prettier": "3.8.4"
+  }
+}
