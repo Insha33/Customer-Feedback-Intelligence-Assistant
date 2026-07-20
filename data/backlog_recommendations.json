@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "source_csv": "data/instagram_reviews_rag.csv",
+    "source_csv_sha256": "065a5f1fcbc66339c33c40988a1a60ba971ec1cbb10a0945e93853e364f2389f",
+    "generated_at": "2026-07-05T12:03:00.013005+00:00",
+    "generator": "data/generate_backlog_recommendations.py",
+    "model": "openai/gpt-4.1-mini",
+    "total_reviews": 549
+  },
+  "recommendations": [
+    {
+      "lane": "Must implement",
+      "action": "Revamp the account suspension system to reduce false positives by improving AI accuracy and adding human review for flagged accounts",
+      "categories": [
+        "Account Suspension",
+        "Content Moderation"
+      ],
+      "evidence": "High volume of users report wrongful account suspensions without clear violations, causing frustration and loss of trust",
+      "impact": "Fewer wrongful account lockouts, clearer appeals, and faster recovery for legitimate users",
+      "confidence": "high"
+    },
+    {
+      "lane": "Must implement",
+      "action": "Fix login and authentication bugs causing users to be unable to access accounts despite correct credentials, including password reset failures",
+      "categories": [
+        "Authentication Issues",
+        "Account Suspension"
+      ],
+      "evidence": "Users report being locked out with correct passwords and failed password reset flows, leading to account access loss",
+      "impact": "Improve user retention and reduce support tickets by ensuring reliable login and recovery processes",
+      "confidence": "high"
+    },
+    {
+      "lane": "Must implement",
+      "action": "Resolve app crashes and performance issues related to content posting, caption saving, and media playback",
+      "categories": [
+        "Performance Issues",
+        "Messaging & DMs"
+      ],
+      "evidence": "Frequent reports of crashes, captions not saving, drafts expiring quickly, and stalled playback of already loaded content",
+      "impact": "Enhance user experience and reduce frustration during core content creation and consumption flows",
+      "confidence": "high"
+    },
+    {
+      "lane": "Should have",
+      "action": "Rework the Reels and Following feed algorithm to show all posts from followed accounts without excessive ads and repeated ad sequences",
+      "categories": [
+        "Reels & Feed Algorithm",
+        "General Feedback"
+      ],
+      "evidence": "Users complain about missing posts from followed accounts and overwhelming ad frequency disrupting feed usability",
+      "impact": "Increase user engagement and satisfaction by restoring expected feed behavior and reducing ad fatigue",
+      "confidence": "high"
+    },
+    {
+      "lane": "Should have",
+      "action": "Add user controls to disable or opt out of AI-generated features such as AI summaries on reels and AI filters",
+      "categories": [
+        "Feature Requests"
+      ],
+      "evidence": "Many users express frustration with forced AI features degrading app enjoyment and want ability to turn them off",
+      "impact": "Improve user satisfaction and retention by respecting user preferences and reducing unwanted AI interference",
+      "confidence": "high"
+    },
+    {
+      "lane": "Should have",
+      "action": "Improve messaging UI by restoring prioritized friend lists for sending DMs and allow disabling of automated 'you're now friends' messages",
+      "categories": [
+        "Messaging & DMs"
+      ],
+      "evidence": "Users find it harder to send messages due to changed friend sorting and are annoyed by unwanted automated messages",
+      "impact": "Streamline messaging workflows and reduce user frustration in communication features",
+      "confidence": "medium"
+    },
+    {
+      "lane": "Should have",
+      "action": "Fix privacy setting synchronization issues between user interface and backend to ensure privacy controls are respected and consistent",
+      "categories": [
+        "Privacy Concerns",
+        "Performance Issues"
+      ],
+      "evidence": "Reports of privacy settings not applying correctly, causing restricted account states and broken UI loops",
+      "impact": "Restore user trust in privacy controls and prevent confusing or restrictive account states",
+      "confidence": "high"
+    },
+    {
+      "lane": "Should have",
+      "action": "Enhance content moderation by improving AI detection accuracy and providing better human support for harassment and hate speech reports",
+      "categories": [
+        "Content Moderation",
+        "Customer Support"
+      ],
+      "evidence": "Users report unchecked abusive content and inability to reach real support for moderation issues",
+      "impact": "Create safer community environment and increase user trust in platform moderation",
+      "confidence": "medium"
+    },
+    {
+      "lane": "Nice to have",
+      "action": "Add a cancel button for video loading processes to improve user control and reduce annoyance from persistent loading notifications",
+      "categories": [
+        "Feature Requests",
+        "Performance Issues"
+      ],
+      "evidence": "Users find loading notifications irritating and want ability to cancel video uploads or loads",
+      "impact": "Improve user experience by giving more control over media loading",
+      "confidence": "medium"
+    },
+    {
+      "lane": "Nice to have",
+      "action": "Restore missing creator tools features such as Repost and Discover Projects and improve UI consistency for scheduling and text layers",
+      "categories": [
+        "Creator Tools"
+      ],
+      "evidence": "Creators report missing features and UI inconsistencies affecting content management and brand collaborations",
+      "impact": "Support creator growth and satisfaction by providing reliable and complete toolsets",
+      "confidence": "medium"
+    },
+    {
+      "lane": "Nice to have",
+      "action": "Reduce ad frequency and improve ad labeling visibility to balance monetization with user experience",
+      "categories": [
+        "General Feedback",
+        "Reels & Feed Algorithm"
+      ],
+      "evidence": "Users complain about excessive ads and poor ad disclosure harming platform enjoyment",
+      "impact": "Maintain revenue while improving user retention and perception of the platform",
+      "confidence": "medium"
+    }
+  ]
+}

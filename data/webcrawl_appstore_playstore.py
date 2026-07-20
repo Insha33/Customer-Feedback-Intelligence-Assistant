@@ -6,7 +6,7 @@ import langid
 
 from datetime import datetime, timedelta
 from google_play_scraper import reviews, Sort
-from classification import classify_dataframe
+from data.classification import classify_dataframe
 
 APP_ID = "com.instagram.android"
 APPSTORE_APP_ID = "389801252"

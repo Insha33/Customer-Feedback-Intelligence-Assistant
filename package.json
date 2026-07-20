@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start:dashboard": "uv run python reviewlens_server.py"
+    "generate:backlog": "uv run python data/generate_backlog_recommendations.py --force",
+    "start:dashboard": "uv run python data/generate_backlog_recommendations.py --allow-stale-on-error && uv run python reviewlens_server.py"
   },
   "devDependencies": {
     "prettier": "3.8.4"

@@ -1,47 +1,33 @@
 const DATA_URL = "/data/instagram_reviews_rag.csv";
-
-const CATEGORY_ACTIONS = {
-  "Account Suspension":
-    "Fix false-positive suspension and appeal recovery flows",
-  "Performance Issues":
-    "Stabilize crashes, update regressions, and load failures",
-  "Feature Requests": "Evaluate repeated feature asks for roadmap fit",
-  "Reels & Feed Algorithm":
-    "Tune feed ranking, reels visibility, and recommendation quality",
-  "Authentication Issues": "Repair login, 2FA, and account recovery paths",
-  "Content Moderation": "Improve moderation accuracy and explanation quality",
-  "Messaging & DMs": "Fix message delivery, notification, and DM reliability",
-  "Privacy Concerns": "Clarify privacy controls and reduce trust-risk reports",
-  "Customer Support": "Shorten support response paths and escalation loops",
-  "Creator Tools": "Improve creator workflows, analytics, and publishing tools",
-  "General Feedback": "Monitor broad satisfaction themes",
-};
+const BACKLOG_URL = "/data/backlog_recommendations.json";
 
 const SENTIMENT_COLORS = {
-  negative: "#d84a4a",
-  neutral: "#c9861a",
-  positive: "#258f67",
+  negative: "#d94f68",
+  neutral: "#d88922",
+  positive: "#2f9d91",
 };
 
 const CATEGORY_COLORS = [
-  "#0f9f8f",
-  "#3b6eea",
-  "#d84a4a",
-  "#c9861a",
-  "#7c5cff",
-  "#258f67",
-  "#e56b8f",
-  "#3aa6b9",
-  "#8b6f47",
-  "#6b7280",
+  "#6554e8",
+  "#2f9d91",
+  "#d94f68",
+  "#d88922",
+  "#496fd8",
+  "#ff725e",
+  "#7c6fe0",
+  "#4ca99f",
+  "#b56979",
+  "#6f7288",
 ];
 
 const state = {
   rows: [],
   filtered: [],
+  backlogItems: [],
+  backlogMetadata: null,
   category: "All",
   sentiment: "All",
-  query: "",
+  priority: "All",
 };
 
 function getElement(selector) {
@@ -57,7 +43,6 @@ function getElement(selector) {
 const els = {
   categoryFilter: getElement("#categoryFilter"),
   sentimentFilter: getElement("#sentimentFilter"),
-  searchInput: getElement("#searchInput"),
   clearFilters: getElement("#clearFilters"),
   criticalCount: getElement("#criticalCount"),
   criticalShare: getElement("#criticalShare"),
@@ -66,10 +51,17 @@ const els = {
   avgRating: getElement("#avgRating"),
   ratingContext: getElement("#ratingContext"),
   categoryTotal: getElement("#categoryTotal"),
+  categoryPanelTitle: getElement("#categoryPanelTitle"),
+  categoryPanelSubtitle: getElement("#categoryPanelSubtitle"),
   categoryChart: getElement("#categoryChart"),
   sentimentChart: getElement("#sentimentChart"),
+  summaryScope: getElement("#summaryScope"),
+  aiSummaryList: getElement("#aiSummaryList"),
+  sentimentCategoryChart: getElement("#sentimentCategoryChart"),
   backlogLanes: getElement("#backlogLanes"),
 };
+
+const navLinks = document.querySelectorAll("[data-nav-target]");
 
 function parseCsv(text) {
   const rows = [];
@@ -163,20 +155,16 @@ function topEntries(counts, limit = 10) {
 }
 
 function applyFilters() {
-  const query = state.query.trim().toLowerCase();
   state.filtered = state.rows.filter((row) => {
     const categoryOk =
       state.category === "All" || row.category === state.category;
     const sentimentOk =
       state.sentiment === "All" || row.sentiment === state.sentiment;
-    const queryOk =
-      !query ||
-      [row.review_text, row.category, row.source, row.review_date]
-        .join(" ")
-        .toLowerCase()
-        .includes(query);
+    const priorityOk =
+      state.priority === "All" ||
+      (row.sentiment === "negative" && row.user_rating <= 2);
 
-    return categoryOk && sentimentOk && queryOk;
+    return categoryOk && sentimentOk && priorityOk;
   });
 }
 
@@ -205,24 +193,66 @@ function setupFilters() {
 
   els.categoryFilter.addEventListener("change", (event) => {
     state.category = event.target.value;
+    state.priority = "All";
     render();
   });
   els.sentimentFilter.addEventListener("change", (event) => {
     state.sentiment = event.target.value;
-    render();
-  });
-  els.searchInput.addEventListener("input", (event) => {
-    state.query = event.target.value;
+    state.priority = "All";
     render();
   });
   els.clearFilters.addEventListener("click", () => {
-    state.category = "All";
-    state.sentiment = "All";
-    state.query = "";
-    els.categoryFilter.value = state.category;
-    els.sentimentFilter.value = state.sentiment;
-    els.searchInput.value = "";
-    render();
+    resetFilters();
+  });
+
+  setupNavigationState();
+}
+
+function resetFilters() {
+  state.category = "All";
+  state.sentiment = "All";
+  state.priority = "All";
+  els.categoryFilter.value = state.category;
+  els.sentimentFilter.value = state.sentiment;
+  render();
+}
+
+function setupNavigationState() {
+  if (!("IntersectionObserver" in window)) {
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+      if (!visible) {
+        return;
+      }
+
+      navLinks.forEach((link) => {
+        const isActive = link.dataset.navTarget === visible.target.id;
+        link.classList.toggle("active", isActive);
+        if (isActive) {
+          link.setAttribute("aria-current", "page");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      });
+    },
+    {
+      rootMargin: "-20% 0px -55% 0px",
+      threshold: [0.15, 0.35, 0.6],
+    },
+  );
+
+  ["overview", "signals", "backlog"].forEach((id) => {
+    const section = document.querySelector(`#${id}`);
+    if (section) {
+      observer.observe(section);
+    }
   });
 }
 
@@ -248,10 +278,19 @@ function renderMetrics(rows) {
 }
 
 function renderCategoryChart(rows) {
+  if (state.category !== "All") {
+    renderCategoryDetail(rows);
+    return;
+  }
+
   const entries = topEntries(countBy(rows, "category"), 10);
   const total = rows.length;
   const max = entries[0]?.[1] || 1;
 
+  els.categoryPanelTitle.textContent = "Issue Category Breakdown";
+  els.categoryPanelSubtitle.textContent =
+    "Click a bar to focus the dashboard on that theme.";
+  els.categoryTotal.textContent = `${total.toLocaleString()} reviews`;
   els.categoryChart.innerHTML = entries
     .map(([category, count], index) => {
       const width = Math.max(4, (count / max) * 100);
@@ -259,7 +298,7 @@ function renderCategoryChart(rows) {
       const isActive = state.category === category;
 
       return `
-        <button class="bar-row ${isActive ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">
+        <button class="bar-row ${isActive ? "active" : ""}" type="button" data-category="${escapeHtml(category)}" aria-label="Focus ${escapeHtml(category)}, ${count.toLocaleString()} reviews, ${pct(count, total)} of current view">
           <span class="bar-label" title="${escapeHtml(category)}">${escapeHtml(category)}</span>
           <span class="bar-track" aria-hidden="true">
             <span class="bar-fill" style="width:${width}%; background:${color}"></span>
@@ -275,10 +314,88 @@ function renderCategoryChart(rows) {
       const selectedCategory = button.dataset.category;
       state.category =
         state.category === selectedCategory ? "All" : selectedCategory;
+      state.priority = "All";
       els.categoryFilter.value = state.category;
       render();
     });
   });
+}
+
+function renderCategoryDetail(rows) {
+  const total = rows.length;
+  const negativeCount = rows.filter(
+    (row) => row.sentiment === "negative",
+  ).length;
+  const lowRatingCount = rows.filter((row) => row.user_rating <= 2).length;
+  const avg = average(rows, "user_rating");
+  const action = recommendedActionForCategory(state.category);
+  const sampleReviews = [...rows]
+    .sort((a, b) => {
+      const aScore =
+        (a.sentiment === "negative" ? 2 : 0) + (a.user_rating <= 2 ? 2 : 0);
+      const bScore =
+        (b.sentiment === "negative" ? 2 : 0) + (b.user_rating <= 2 ? 2 : 0);
+      return bScore - aScore;
+    })
+    .slice(0, 3);
+
+  els.categoryPanelTitle.textContent = "Category Deep Dive";
+  els.categoryPanelSubtitle.textContent =
+    "Focused evidence and action signals for the selected category.";
+  els.categoryTotal.textContent = state.category;
+  els.categoryChart.innerHTML = `
+    <section class="category-detail" aria-label="${escapeHtml(state.category)} details">
+      <div class="detail-hero">
+        <div>
+          <span class="detail-label">Selected category</span>
+          <h3>${escapeHtml(state.category)}</h3>
+          <p>${escapeHtml(action)}</p>
+        </div>
+        <button class="ghost-button compact" type="button" data-clear-category>
+          Show all
+        </button>
+      </div>
+      <div class="detail-metrics">
+        <div>
+          <strong>${total.toLocaleString()}</strong>
+          <span>reviews</span>
+        </div>
+        <div>
+          <strong>${pct(negativeCount, total)}</strong>
+          <span>negative</span>
+        </div>
+        <div>
+          <strong>${pct(lowRatingCount, total)}</strong>
+          <span>1-2 star</span>
+        </div>
+        <div>
+          <strong>${avg ? avg.toFixed(1) : "-"}</strong>
+          <span>avg rating</span>
+        </div>
+      </div>
+      <div class="review-samples">
+        ${sampleReviews
+          .map(
+            (row) => `
+              <article>
+                <span>${escapeHtml(row.review_id)} · ${escapeHtml(row.source || "unknown")} · ${row.user_rating || "-"} star</span>
+                <p>${escapeHtml(row.review_text || "")}</p>
+              </article>
+            `,
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+
+  els.categoryChart
+    .querySelector("[data-clear-category]")
+    .addEventListener("click", () => {
+      state.category = "All";
+      state.priority = "All";
+      els.categoryFilter.value = state.category;
+      render();
+    });
 }
 
 function renderDonut(rows) {
@@ -317,7 +434,7 @@ function renderDonut(rows) {
   const legend = segments
     .map(
       (segment) => `
-        <button class="legend-item ${state.sentiment === segment.name ? "active" : ""}" type="button" data-sentiment="${segment.name}">
+        <button class="legend-item ${state.sentiment === segment.name ? "active" : ""}" type="button" data-sentiment="${segment.name}" aria-label="Filter to ${segment.name} sentiment, ${pct(segment.value, rows.length)} of current view">
           <span class="legend-name">
             <span class="swatch" style="background:${segment.color}"></span>
             ${escapeHtml(segment.name)}
@@ -349,71 +466,201 @@ function renderDonut(rows) {
   });
 }
 
-function categoryBacklog(rows) {
-  const grouped = Object.entries(countBy(rows, "category")).map(
-    ([category, count]) => {
+function renderSentimentPerCategory(rows) {
+  const entries = Object.entries(countBy(rows, "category"))
+    .map(([category, total]) => {
       const categoryRows = rows.filter((row) => row.category === category);
-      const negative = categoryRows.filter(
-        (row) => row.sentiment === "negative",
-      ).length;
-      const lowRating = categoryRows.filter(
-        (row) => row.user_rating <= 2,
-      ).length;
-      const quality = average(categoryRows, "quality_score");
-      const score =
-        count * 1.2 + negative * 1.4 + lowRating * 1.6 + quality * 8;
-
-      let lane = "Nice to have";
-      if (score >= 180 || (count >= 35 && lowRating / count >= 0.55)) {
-        lane = "Must implement";
-      } else if (score >= 70 || count >= 15) {
-        lane = "Should have";
-      }
+      const counts = countBy(categoryRows, "sentiment");
+      const positive = counts.positive || 0;
+      const neutral = counts.neutral || 0;
+      const negative = counts.negative || 0;
+      const negativeRatio = total ? negative / total : 0;
+      const averageRating = average(categoryRows, "user_rating");
 
       return {
         category,
-        count,
+        total,
+        positive,
+        neutral,
         negative,
-        lowRating,
-        quality,
-        score,
-        lane,
-        action:
-          CATEGORY_ACTIONS[category] ||
-          `Investigate recurring ${category} feedback`,
+        negativeRatio,
+        averageRating,
       };
-    },
-  );
+    })
+    .sort((a, b) => {
+      if (b.negative !== a.negative) {
+        return b.negative - a.negative;
+      }
 
-  return grouped.sort((a, b) => b.score - a.score);
+      return b.negativeRatio - a.negativeRatio;
+    })
+    .slice(0, 8);
+
+  const rowsHtml = entries
+    .map((entry) => {
+      const severity =
+        entry.negativeRatio >= 0.8
+          ? "Critical"
+          : entry.negativeRatio >= 0.55
+            ? "Watch"
+            : "Mixed";
+
+      return `
+        <button class="sentiment-row" type="button" data-category="${escapeHtml(entry.category)}" aria-label="Open ${escapeHtml(entry.category)} deep dive: ${entry.total.toLocaleString()} reviews, ${entry.negative.toLocaleString()} negative, ${entry.positive.toLocaleString()} positive, average rating ${entry.averageRating.toFixed(1)}, ${severity} priority">
+          <span class="sentiment-category">
+            <strong>${escapeHtml(entry.category)}</strong>
+            <small>${entry.total.toLocaleString()} reviews analyzed</small>
+          </span>
+          <span class="sentiment-value">${entry.total.toLocaleString()}</span>
+          <span class="sentiment-value negative">${entry.negative.toLocaleString()} <small>${pct(entry.negative, entry.total)}</small></span>
+          <span class="sentiment-value positive">${entry.positive.toLocaleString()} <small>${pct(entry.positive, entry.total)}</small></span>
+          <span class="sentiment-value">${entry.averageRating.toFixed(1)}</span>
+          <span class="severity-pill ${severity.toLowerCase()}">${severity}</span>
+        </button>
+      `;
+    })
+    .join("");
+
+  els.sentimentCategoryChart.innerHTML = `
+    <div class="sentiment-table-head" aria-hidden="true">
+      <span>Issue category</span>
+      <span>Total</span>
+      <span>Negative</span>
+      <span>Positive</span>
+      <span>Avg rating</span>
+      <span>Priority</span>
+    </div>
+    ${rowsHtml}
+  `;
+
+  els.sentimentCategoryChart
+    .querySelectorAll("[data-category]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        state.category = button.dataset.category;
+        state.priority = "All";
+        els.categoryFilter.value = state.category;
+        render();
+        document.querySelector("#overview").scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    });
 }
 
-function renderBacklog(rows) {
+function productImplication(rows) {
+  const lowRatingCount = rows.filter((row) => row.user_rating <= 2).length;
+  const negativeCount = rows.filter(
+    (row) => row.sentiment === "negative",
+  ).length;
+
+  if (!rows.length) {
+    return "No product implication is available for the current filters.";
+  }
+
+  if (
+    negativeCount / rows.length >= 0.7 ||
+    lowRatingCount / rows.length >= 0.5
+  ) {
+    return "This view is dominated by high-severity dissatisfaction, so the product story should focus on reducing trust, access, or reliability pain before adding new features.";
+  }
+
+  return "This view has a mixed signal, so product teams should compare complaint severity with implementation effort before prioritizing roadmap work.";
+}
+
+function renderAiSummary(rows) {
+  const categoryCounts = countBy(rows, "category");
+  const topCategories = topEntries(categoryCounts, 3);
+  const sentimentCounts = countBy(rows, "sentiment");
+  const topNegativeCategories = topEntries(
+    rows
+      .filter((row) => row.sentiment === "negative")
+      .reduce((acc, row) => {
+        acc[row.category] = (acc[row.category] || 0) + 1;
+        return acc;
+      }, {}),
+    3,
+  );
+  const positiveRows = rows.filter((row) => row.sentiment === "positive");
+  const positiveTop = topEntries(countBy(positiveRows, "category"), 1)[0]?.[0];
+  const negativeShare = pct(sentimentCounts.negative || 0, rows.length);
+  const topCategoryText = topCategories
+    .map(([category, count]) => `${category} (${pct(count, rows.length)})`)
+    .join(", ");
+  const negativeCategoryText = topNegativeCategories
+    .map(([category]) => category)
+    .join(", ");
+
+  els.summaryScope.textContent =
+    state.category === "All" ? "Instagram" : state.category;
+  els.aiSummaryList.innerHTML = [
+    `Most Instagram feedback in this view clusters around ${topCategoryText || "the selected filters"}.`,
+    `${negativeShare} of the current review set is negative, with the strongest concentration in ${negativeCategoryText || "the leading issue categories"}.`,
+    productImplication(rows),
+    positiveTop
+      ? `Positive reviews mainly cluster around ${positiveTop}, which is the best place to identify what users still value.`
+      : "Positive review volume is low in this view, so the product story should focus on reducing pain before amplifying strengths.",
+  ]
+    .map(
+      (insight) =>
+        `<article><span></span><p>${escapeHtml(insight)}</p></article>`,
+    )
+    .join("");
+}
+
+function recommendedActionForCategory(category) {
+  const item = state.backlogItems.find((backlogItem) =>
+    (backlogItem.categories || []).includes(category),
+  );
+
+  return (
+    item?.action ||
+    `Use the backlog recommendations to investigate recurring ${category} feedback.`
+  );
+}
+
+function itemMatchesCurrentFilters(item) {
+  const categoryOk =
+    state.category === "All" ||
+    (item.categories || []).includes(state.category);
+  const sentimentOk =
+    state.sentiment === "All" ||
+    state.sentiment === "negative" ||
+    (item.evidence || "").toLowerCase().includes(state.sentiment);
+
+  return categoryOk && sentimentOk;
+}
+
+function renderBacklog() {
   const lanes = ["Must implement", "Should have", "Nice to have"];
   const laneClasses = {
     "Must implement": "must",
     "Should have": "should",
     "Nice to have": "nice",
   };
-  const items = categoryBacklog(rows);
+  const items = state.backlogItems.filter(itemMatchesCurrentFilters);
 
   els.backlogLanes.innerHTML = lanes
     .map((lane) => {
       const laneItems = items.filter((item) => item.lane === lane);
+      const previewItems = laneItems.slice(0, 1);
       const list =
-        laneItems
+        previewItems
           .map(
             (item) => `
-              <article class="backlog-item">
+              <article class="backlog-item backlog-preview-item">
                 <h3>${escapeHtml(item.action)}</h3>
-                <p>${escapeHtml(item.category)} has ${item.count.toLocaleString()} reviews, ${pct(
-                  item.negative,
-                  item.count,
-                )} negative sentiment, and ${pct(item.lowRating, item.count)} low ratings.</p>
+                <p>${escapeHtml(item.evidence || "")}</p>
                 <div class="backlog-meta">
-                  <span class="chip ${lane === "Must implement" ? "urgent" : ""}">${item.count} reviews</span>
-                  <span class="chip">score ${Math.round(item.score)}</span>
-                  <span class="chip">quality ${item.quality.toFixed(1)}</span>
+                  ${(item.categories || [])
+                    .slice(0, 2)
+                    .map(
+                      (category) =>
+                        `<span class="chip ${lane === "Must implement" ? "urgent" : ""}">${escapeHtml(category)}</span>`,
+                    )
+                    .join("")}
+                  <a class="chip chip-link" href="./backlog.html">View details</a>
                 </div>
               </article>
             `,
@@ -432,6 +679,19 @@ function renderBacklog(rows) {
       `;
     })
     .join("");
+
+  els.backlogLanes.querySelectorAll("[data-category]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.category = button.dataset.category;
+      state.priority = "All";
+      els.categoryFilter.value = state.category;
+      document.querySelector("#overview").scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      render();
+    });
+  });
 }
 
 function render() {
@@ -439,7 +699,9 @@ function render() {
   renderMetrics(state.filtered);
   renderCategoryChart(state.filtered);
   renderDonut(state.filtered);
-  renderBacklog(state.filtered);
+  renderAiSummary(state.filtered);
+  renderSentimentPerCategory(state.filtered);
+  renderBacklog();
 }
 
 function escapeHtml(value) {
@@ -453,15 +715,28 @@ function escapeHtml(value) {
 
 async function init() {
   try {
-    const response = await fetch(DATA_URL, {
-      cache: "no-store",
-    });
+    const [response, backlogResponse] = await Promise.all([
+      fetch(DATA_URL, {
+        cache: "no-store",
+      }),
+      fetch(BACKLOG_URL, {
+        cache: "no-store",
+      }),
+    ]);
     if (!response.ok) {
       throw new Error(`Could not load ${DATA_URL}: HTTP ${response.status}`);
     }
+    if (!backlogResponse.ok) {
+      throw new Error(
+        `Could not load ${BACKLOG_URL}: HTTP ${backlogResponse.status}`,
+      );
+    }
 
     const csv = await response.text();
+    const backlogData = await backlogResponse.json();
     state.rows = parseCsv(csv).map(normalizeRow);
+    state.backlogItems = backlogData.recommendations || [];
+    state.backlogMetadata = backlogData.metadata || null;
 
     if (!state.rows.length) {
       throw new Error("The review CSV loaded but did not contain any rows.");

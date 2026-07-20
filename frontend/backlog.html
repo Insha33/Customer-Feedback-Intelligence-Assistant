@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReviewLens Backlog</title>
+    <link rel="stylesheet" href="./styles.css?v=20260709-evidence-room" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">RL</span>
+          <span>ReviewLens</span>
+        </div>
+        <nav class="nav-list">
+          <a class="nav-item" href="./">
+            <span class="nav-dot primary"></span>
+            Overview
+          </a>
+          <a class="nav-item active" href="./backlog.html" aria-current="page">
+            <span class="nav-dot amber"></span>
+            Backlog
+          </a>
+          <a class="nav-item" href="./chat.html">
+            <span class="nav-dot green"></span>
+            Ask AI
+          </a>
+        </nav>
+        <div class="sidebar-card">
+          <span>Product planning</span>
+          <strong>Recommended backlog</strong>
+          <p>Prioritized actions generated from Instagram review evidence.</p>
+        </div>
+      </aside>
+
+      <main id="main-content" class="main" tabindex="-1">
+        <header class="topbar">
+          <div>
+            <span class="product-kicker">Instagram feedback dashboard</span>
+            <h1>Recommended Product Backlog</h1>
+            <p class="page-subtitle">
+              Expanded LLM recommendations grouped by implementation priority.
+            </p>
+          </div>
+          <a class="ghost-button page-action" href="./">Back to analysis</a>
+        </header>
+
+        <section class="panel backlog-detail-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Action Details</h2>
+              <p id="backlogMeta">Loading generated backlog...</p>
+            </div>
+          </div>
+          <div id="backlogDetailLanes" class="backlog-detail-lanes"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./backlog.js?v=20260709-evidence-room" defer></script>
+  </body>
+</html>

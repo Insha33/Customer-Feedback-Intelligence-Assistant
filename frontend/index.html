@@ -3,10 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ReviewLens</title>
-    <link rel="stylesheet" href="./styles.css?v=20260705-rag-chat" />
+    <title>ReviewLens Instagram Analysis</title>
+    <link rel="stylesheet" href="./styles.css?v=20260709-evidence-room" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="app-shell">
       <aside class="sidebar" aria-label="Primary navigation">
         <div class="brand">
@@ -14,16 +15,43 @@
           <span>ReviewLens</span>
         </div>
         <nav class="nav-list">
-          <a class="nav-item active" href="#overview">Overview</a>
-          <a class="nav-item" href="#backlog">Backlog</a>
-          <a class="nav-item" href="./chat.html">Ask AI</a>
+          <a
+            class="nav-item active"
+            href="#overview"
+            data-nav-target="overview"
+            aria-current="page"
+          >
+            <span class="nav-dot primary"></span>
+            Overview
+          </a>
+          <a class="nav-item" href="./backlog.html">
+            <span class="nav-dot amber"></span>
+            Backlog
+          </a>
+          <a class="nav-item" href="./chat.html">
+            <span class="nav-dot green"></span>
+            Ask AI
+          </a>
         </nav>
+        <div class="sidebar-card">
+          <span>Product signal</span>
+          <strong>Review triage</strong>
+          <p>
+            Find patterns, inspect categories, and turn feedback into backlog
+            decisions.
+          </p>
+        </div>
       </aside>
 
-      <main class="main">
+      <main id="main-content" class="main" tabindex="-1">
         <header class="topbar">
           <div>
-            <h1>Review Analysis</h1>
+            <span class="product-kicker">Instagram feedback dashboard</span>
+            <h1>Instagram Review Analysis</h1>
+            <p class="page-subtitle">
+              Interactive app-store review intelligence for Instagram product
+              decisions.
+            </p>
           </div>
           <div class="controls" aria-label="Dashboard filters">
             <label>
@@ -34,15 +62,6 @@
               Sentiment
               <select id="sentimentFilter"></select>
             </label>
-            <label>
-              Search
-              <input
-                id="searchInput"
-                type="search"
-                placeholder="Search reviews"
-                autocomplete="off"
-              />
-            </label>
             <button id="clearFilters" class="ghost-button" type="button">
               Reset
             </button>
@@ -50,20 +69,29 @@
         </header>
 
         <section class="metrics-grid" aria-label="Key metrics">
-          <article class="metric-card urgent">
-            <span class="metric-label">Needs immediate attention</span>
-            <strong id="criticalCount">-</strong>
-            <span id="criticalShare">-</span>
+          <article class="metric-card metric-pink">
+            <div>
+              <span class="metric-label">Largest customer pain</span>
+              <strong id="topIssue">-</strong>
+              <span id="topIssueShare">-</span>
+            </div>
+            <span class="sparkline spark-purple" aria-hidden="true"></span>
           </article>
-          <article class="metric-card">
-            <span class="metric-label">Largest customer pain</span>
-            <strong id="topIssue">-</strong>
-            <span id="topIssueShare">-</span>
+          <article class="metric-card metric-blue">
+            <div>
+              <span class="metric-label">Needs immediate attention</span>
+              <strong id="criticalCount">-</strong>
+              <span id="criticalShare">-</span>
+            </div>
+            <span class="sparkline spark-red" aria-hidden="true"></span>
           </article>
-          <article class="metric-card">
-            <span class="metric-label">Satisfaction score</span>
-            <strong id="avgRating">-</strong>
-            <span id="ratingContext">-</span>
+          <article class="metric-card metric-mint">
+            <div>
+              <span class="metric-label">Satisfaction score</span>
+              <strong id="avgRating">-</strong>
+              <span id="ratingContext">-</span>
+            </div>
+            <span class="sparkline spark-teal" aria-hidden="true"></span>
           </article>
         </section>
 
@@ -71,8 +99,10 @@
           <article class="panel large-panel">
             <div class="panel-header">
               <div>
-                <h2>Issue Category Breakdown</h2>
-                <p>Click a bar to focus the dashboard on that theme.</p>
+                <h2 id="categoryPanelTitle">Issue Category Breakdown</h2>
+                <p id="categoryPanelSubtitle">
+                  Click a bar to focus the dashboard on that theme.
+                </p>
               </div>
               <span id="categoryTotal" class="panel-stat">-</span>
             </div>
@@ -90,21 +120,50 @@
           </article>
         </section>
 
+        <section id="signals" class="signal-grid">
+          <article class="panel insight-summary-panel">
+            <div class="panel-header">
+              <div>
+                <h2>AI Summary</h2>
+                <p>
+                  Product-readable insights generated from the current Instagram
+                  review view.
+                </p>
+              </div>
+              <span id="summaryScope" class="panel-stat">Instagram</span>
+            </div>
+            <div id="aiSummaryList" class="ai-summary-list"></div>
+          </article>
+
+          <article class="panel wide-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Sentiment per Category</h2>
+                <p>
+                  Shows where Instagram problems are concentrated by issue type.
+                </p>
+              </div>
+            </div>
+            <div id="sentimentCategoryChart" class="sentiment-table"></div>
+          </article>
+        </section>
+
         <section id="backlog" class="panel backlog-panel">
           <div class="panel-header">
             <div>
-              <h2>Product Backlog From Reviews</h2>
+              <h2>Recommended Product Backlog</h2>
               <p>
-                Actions are ranked by complaint volume, negative sentiment, low
-                ratings, and signal quality.
+                Short preview of generated actions. Open the full backlog for
+                evidence and implementation detail.
               </p>
             </div>
+            <a class="panel-link" href="./backlog.html">View full backlog</a>
           </div>
           <div id="backlogLanes" class="backlog-lanes"></div>
         </section>
       </main>
     </div>
 
-    <script src="./app.js?v=20260705-rag-chat" defer></script>
+    <script src="./app.js?v=20260709-evidence-room" defer></script>
   </body>
 </html>

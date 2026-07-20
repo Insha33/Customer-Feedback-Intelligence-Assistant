@@ -1,40 +1,98 @@
 const chatMessages = document.querySelector("#chatMessages");
+const chatPanel = document.querySelector(".chat-panel");
 const chatForm = document.querySelector("#chatForm");
 const questionInput = document.querySelector("#questionInput");
 const sendQuestion = document.querySelector("#sendQuestion");
-const chatStatus = document.querySelector("#chatStatus");
+const WORKING_STATES = [
+  "Reading the question",
+  "Checking review metrics",
+  "Retrieving matching reviews",
+  "Drafting a concise answer",
+];
 
 function appendMessage(role, content, sources = []) {
+  chatPanel.classList.add("chat-active");
+  const wrapper = document.createElement("div");
+  wrapper.className = `message-wrap ${role}`;
+
+  const title = document.createElement("div");
+  title.className = "message-author";
+  title.textContent = role === "user" ? "You" : "ReviewLens AI";
+
   const article = document.createElement("article");
   article.className = `message ${role}`;
-
-  const title = document.createElement("strong");
-  title.textContent = role === "user" ? "You" : "ReviewLens";
 
   const body = document.createElement("p");
   body.textContent = content;
 
-  article.append(title, body);
+  article.append(body);
 
   if (sources.length) {
     const sourceList = document.createElement("div");
     sourceList.className = "source-list";
     sources.slice(0, 5).forEach((source) => {
       const item = document.createElement("span");
-      item.textContent = `${source.review_id} · ${source.category || "Uncategorized"}`;
+      item.textContent = [
+        source.review_id,
+        source.category || "Uncategorized",
+        source.sentiment,
+      ]
+        .filter(Boolean)
+        .join(" · ");
       sourceList.append(item);
     });
     article.append(sourceList);
   }
 
-  chatMessages.append(article);
+  wrapper.append(title, article);
+  chatMessages.append(wrapper);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function appendWorkingMessage() {
+  chatPanel.classList.add("chat-active");
+  const wrapper = document.createElement("div");
+  wrapper.className = "message-wrap assistant";
+
+  const title = document.createElement("div");
+  title.className = "message-author";
+  title.textContent = "ReviewLens AI";
+
+  const article = document.createElement("article");
+  article.className = "message assistant thinking-message";
+  article.setAttribute("aria-live", "polite");
+
+  const status = document.createElement("span");
+  status.className = "thinking-text";
+  status.textContent = WORKING_STATES[0];
+
+  const dots = document.createElement("span");
+  dots.className = "thinking-dots";
+  dots.setAttribute("aria-hidden", "true");
+  dots.innerHTML = "<span></span><span></span><span></span>";
+
+  article.append(status, dots);
+  wrapper.append(title, article);
+  chatMessages.append(wrapper);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  let index = 0;
+  const intervalId = window.setInterval(() => {
+    index = (index + 1) % WORKING_STATES.length;
+    status.textContent = WORKING_STATES[index];
+  }, 1400);
+
+  return {
+    remove() {
+      window.clearInterval(intervalId);
+      wrapper.remove();
+    },
+  };
 }
 
 function setLoading(isLoading) {
   sendQuestion.disabled = isLoading;
   questionInput.disabled = isLoading;
-  chatStatus.textContent = isLoading ? "Searching Qdrant..." : "Hybrid RAG";
 }
 
 async function readApiResponse(response) {
@@ -60,6 +118,7 @@ async function readApiResponse(response) {
 
 async function askQuestion(question) {
   setLoading(true);
+  const workingMessage = appendWorkingMessage();
 
   try {
     const response = await fetch("/api/chat", {
@@ -75,8 +134,10 @@ async function askQuestion(question) {
       throw new Error(data.error || "The chatbot request failed.");
     }
 
+    workingMessage.remove();
     appendMessage("assistant", data.answer, data.sources || []);
   } catch (error) {
+    workingMessage.remove();
     appendMessage("assistant", `I could not answer that yet: ${error.message}`);
   } finally {
     setLoading(false);
@@ -102,4 +163,13 @@ document.querySelectorAll("[data-prompt]").forEach((button) => {
     questionInput.value = button.dataset.prompt;
     questionInput.focus();
   });
+});
+
+questionInput.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || event.shiftKey) {
+    return;
+  }
+
+  event.preventDefault();
+  chatForm.requestSubmit();
 });

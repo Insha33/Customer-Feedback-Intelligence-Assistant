@@ -1,7 +1,9 @@
+import csv
 import json
 import math
 import os
 import re
+import sqlite3
 import time
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -35,15 +37,21 @@ PORT = int(os.getenv("REVIEWLENS_PORT", "8080"))
 COLLECTION_NAME = os.getenv("QDRANT_COLLECTION", "instagram_feedback")
 EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
 CHAT_MODEL = os.getenv("OPENROUTER_CHAT_MODEL", "openai/gpt-4.1-mini")
-RETRIEVAL_LIMIT = int(os.getenv("RAG_RETRIEVAL_LIMIT", "12"))
+RETRIEVAL_LIMIT = int(os.getenv("RAG_RETRIEVAL_LIMIT", "6"))
 DENSE_LIMIT = int(os.getenv("RAG_DENSE_LIMIT", "28"))
 LEXICAL_LIMIT = int(os.getenv("RAG_LEXICAL_LIMIT", "28"))
 DOC_CACHE_SECONDS = int(os.getenv("RAG_DOC_CACHE_SECONDS", "300"))
+REVIEW_CSV = Path(os.getenv("REVIEWLENS_REVIEW_CSV", "data/instagram_reviews_rag.csv"))
 
 WORD_RE = re.compile(r"[a-z0-9']+")
 DOC_CACHE = {
     "loaded_at": 0,
     "docs": [],
+}
+SQL_CACHE = {
+    "mtime": None,
+    "conn": None,
+    "categories": [],
 }
 
 
@@ -123,6 +131,244 @@ def payload_text(payload):
             "source",
             "review_date",
             "user_rating",
+        ]
+    )
+
+
+def review_csv_path():
+    if REVIEW_CSV.is_absolute():
+        return REVIEW_CSV
+
+    return Path(__file__).resolve().parent / REVIEW_CSV
+
+
+def load_review_sqlite():
+    path = review_csv_path()
+
+    if not path.exists():
+        return None, []
+
+    mtime = path.stat().st_mtime
+
+    if SQL_CACHE["conn"] is not None and SQL_CACHE["mtime"] == mtime:
+        return SQL_CACHE["conn"], SQL_CACHE["categories"]
+
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        """
+        CREATE TABLE reviews (
+            review_id TEXT,
+            source TEXT,
+            user_rating REAL,
+            review_text TEXT,
+            category TEXT,
+            review_date TEXT,
+            sentiment TEXT,
+            quality_score REAL
+        )
+        """
+    )
+
+    with path.open(newline="", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        rows = [
+            (
+                row.get("review_id", ""),
+                row.get("source", ""),
+                float(row.get("user_rating") or 0),
+                row.get("review_text", ""),
+                row.get("category", ""),
+                row.get("review_date", ""),
+                (row.get("sentiment") or "").lower(),
+                float(row.get("quality_score") or 0),
+            )
+            for row in reader
+        ]
+
+    conn.executemany(
+        """
+        INSERT INTO reviews (
+            review_id,
+            source,
+            user_rating,
+            review_text,
+            category,
+            review_date,
+            sentiment,
+            quality_score
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        rows,
+    )
+    conn.commit()
+
+    categories = [
+        row["category"]
+        for row in conn.execute(
+            "SELECT DISTINCT category FROM reviews WHERE category != ''"
+        )
+    ]
+
+    if SQL_CACHE["conn"] is not None:
+        SQL_CACHE["conn"].close()
+
+    SQL_CACHE["conn"] = conn
+    SQL_CACHE["mtime"] = mtime
+    SQL_CACHE["categories"] = categories
+    return conn, categories
+
+
+def should_use_structured_analytics(question):
+    query = (question or "").lower()
+    metric_terms = [
+        "how many",
+        "count",
+        "percentage",
+        "percent",
+        "share",
+        "average",
+        "avg",
+        "rating",
+        "top",
+        "most",
+        "least",
+        "breakdown",
+        "distribution",
+        "split",
+        "compare",
+        "category",
+        "categories",
+        "sentiment",
+        "source",
+        "app store",
+        "play store",
+    ]
+
+    return any(term in query for term in metric_terms)
+
+
+def extract_analytics_filters(question, categories):
+    query = (question or "").lower()
+    filters = []
+    params = []
+    labels = []
+
+    for category in sorted(categories, key=len, reverse=True):
+        if category.lower() in query:
+            filters.append("category = ?")
+            params.append(category)
+            labels.append(f"category={category}")
+            break
+
+    for sentiment in ["negative", "neutral", "positive"]:
+        if sentiment in query:
+            filters.append("sentiment = ?")
+            params.append(sentiment)
+            labels.append(f"sentiment={sentiment}")
+            break
+
+    source_aliases = {
+        "app_store": ["app store", "ios", "iphone"],
+        "play_store": ["play store", "android", "google play"],
+        "meta_forum": ["meta forum", "forum", "community forum"],
+    }
+    source_mentions = [
+        source
+        for source, aliases in source_aliases.items()
+        if any(alias in query for alias in aliases)
+    ]
+    asks_for_source_comparison = any(
+        term in query for term in ["source split", "split", "compare", "versus", " vs "]
+    )
+
+    if len(source_mentions) == 1 and not asks_for_source_comparison:
+        filters.append("source = ?")
+        params.append(source_mentions[0])
+        labels.append(f"source={source_mentions[0]}")
+
+    rating_match = re.search(r"\b([1-5])\s*-?\s*star", query)
+    if rating_match:
+        filters.append("CAST(user_rating AS INTEGER) = ?")
+        params.append(int(rating_match.group(1)))
+        labels.append(f"rating={rating_match.group(1)} star")
+    elif any(term in query for term in ["critical", "low rating", "low-rated"]):
+        filters.append("user_rating <= 2")
+        labels.append("rating<=2")
+
+    return filters, params, labels
+
+
+def fetch_count(conn, where_clause, params):
+    return conn.execute(
+        f"SELECT COUNT(*) AS count FROM reviews {where_clause}",
+        params,
+    ).fetchone()["count"]
+
+
+def fetch_group_counts(conn, column, where_clause, params, limit=5):
+    return conn.execute(
+        f"""
+        SELECT {column} AS label, COUNT(*) AS count
+        FROM reviews
+        {where_clause}
+        GROUP BY {column}
+        ORDER BY count DESC, label ASC
+        LIMIT ?
+        """,
+        [*params, limit],
+    ).fetchall()
+
+
+def format_group_counts(rows):
+    if not rows:
+        return "none"
+
+    return ", ".join(f"{row['label'] or 'Unknown'}: {row['count']}" for row in rows)
+
+
+def structured_analytics_context(question):
+    if not should_use_structured_analytics(question):
+        return None
+
+    conn, categories = load_review_sqlite()
+
+    if conn is None:
+        return None
+
+    filters, params, labels = extract_analytics_filters(question, categories)
+    where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
+    total_reviews = fetch_count(conn, "", [])
+    matching_reviews = fetch_count(conn, where_clause, params)
+    avg_rating = conn.execute(
+        f"SELECT AVG(user_rating) AS avg_rating FROM reviews {where_clause}",
+        params,
+    ).fetchone()["avg_rating"]
+    low_rating_count = conn.execute(
+        f"SELECT COUNT(*) AS count FROM reviews {where_clause} {'AND' if where_clause else 'WHERE'} user_rating <= 2",
+        params,
+    ).fetchone()["count"]
+
+    sentiment_counts = fetch_group_counts(conn, "sentiment", where_clause, params, 6)
+    category_counts = fetch_group_counts(conn, "category", where_clause, params, 6)
+    source_counts = fetch_group_counts(conn, "source", where_clause, params, 6)
+    matching_share = (
+        f"{round((matching_reviews / total_reviews) * 100)}%"
+        if total_reviews
+        else "0%"
+    )
+
+    return "\n".join(
+        [
+            "Structured analytics from local review CSV:",
+            f"- Scope filters: {', '.join(labels) if labels else 'all reviews'}",
+            f"- Matching reviews: {matching_reviews} of {total_reviews} ({matching_share})",
+            f"- Average rating: {avg_rating:.2f}" if avg_rating is not None else "- Average rating: n/a",
+            f"- Low-rating reviews (<=2 stars): {low_rating_count}",
+            f"- Sentiment split: {format_group_counts(sentiment_counts)}",
+            f"- Top issue categories: {format_group_counts(category_counts)}",
+            f"- Source split: {format_group_counts(source_counts)}",
         ]
     )
 
@@ -295,9 +541,9 @@ def build_context(docs):
     return "\n\n".join(chunks)
 
 
-def answer_question(openrouter_client, question, docs):
+def answer_question(openrouter_client, question, docs, analytics_context=None):
     context = build_context(docs)
-    user_prompt = build_user_prompt(question, context)
+    user_prompt = build_user_prompt(question, context, analytics_context)
 
     response = openrouter_client.chat.completions.create(
         model=CHAT_MODEL,
@@ -320,6 +566,7 @@ def handle_chat(question):
     openai_client = get_openai_client()
     openrouter_client = get_openrouter_client()
     qdrant_client = get_qdrant_client()
+    analytics_context = structured_analytics_context(question)
     query_vector = embed_query(openai_client, question)
     docs = load_qdrant_documents(qdrant_client)
     dense_results = dense_search(qdrant_client, query_vector)
@@ -330,16 +577,44 @@ def handle_chat(question):
     )
 
     if not fused_docs:
+        if analytics_context:
+            return {
+                "answer": answer_question(
+                    openrouter_client,
+                    question,
+                    [],
+                    analytics_context,
+                ),
+                "sources": [],
+                "retrieval": {
+                    "mode": "structured_sql_only",
+                    "structured_analytics_used": True,
+                    "dense_candidates": len(dense_results),
+                    "lexical_candidates": len(lexical_results),
+                    "returned_contexts": 0,
+                },
+            }
+
         return {
             "answer": "I could not find matching reviews in the Qdrant collection.",
             "sources": [],
         }
 
     return {
-        "answer": answer_question(openrouter_client, question, fused_docs),
+        "answer": answer_question(
+            openrouter_client,
+            question,
+            fused_docs,
+            analytics_context,
+        ),
         "sources": [source_summary(doc) for doc in fused_docs],
         "retrieval": {
-            "mode": "dense_vector_plus_lexical_rrf",
+            "mode": (
+                "structured_sql_plus_dense_vector_lexical_rrf"
+                if analytics_context
+                else "dense_vector_plus_lexical_rrf"
+            ),
+            "structured_analytics_used": bool(analytics_context),
             "dense_candidates": len(dense_results),
             "lexical_candidates": len(lexical_results),
             "returned_contexts": len(fused_docs),
@@ -368,6 +643,7 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
                     "embedding_model": EMBEDDING_MODEL,
                     "chat_model": CHAT_MODEL,
                     "chat_provider": "openrouter",
+                    "analytics_mode": "sqlite_csv_plus_qdrant_rag",
                     "qdrant_configured": bool(
                         os.getenv("QDRANT_URL")
                         or os.getenv("QDRANT_CLUSTER_ENDPOINT")
@@ -383,6 +659,8 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
             self.path = "/frontend/"
         elif parsed.path == "/chat":
             self.path = "/frontend/chat.html"
+        elif parsed.path == "/backlog":
+            self.path = "/frontend/backlog.html"
 
         return super().do_GET()
 

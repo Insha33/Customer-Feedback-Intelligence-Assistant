@@ -1,0 +1,1061 @@
+{
+  "version": 1,
+  "skills": {
+    "a-b-test-design": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "prototyping-testing/skills/a-b-test-design/SKILL.md",
+      "computedHash": "1fb9ab99f1c8ec9757027fc3b3fdb501a8139cf4cd780de534bd6462377fc6ae"
+    },
+    "ability-spectrum-mapping": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/ability-spectrum-mapping/SKILL.md",
+      "computedHash": "e5ff9f9db42f622d2291fc050c618325c0dbd26fab2a58c4048077e15c33dee2"
+    },
+    "accessibility-audit": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/accessibility-audit/SKILL.md",
+      "computedHash": "a9059193adfcf3d548b770382bd5b4dae9496cc4c324812fecd0e6c15ceaceb1"
+    },
+    "accessibility-debt-tracking": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessibility-decisions/skills/accessibility-debt-tracking/SKILL.md",
+      "computedHash": "3c929f2880bb3c20c86fa109d6a0dfeda70e28afed1d73f40b43b5d307baae25"
+    },
+    "accessibility-test-plan": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "prototyping-testing/skills/accessibility-test-plan/SKILL.md",
+      "computedHash": "74b8bf6936e2f1f9aeca41e6a94a890c6be918cc4e7c386de12308cbd19da4cb"
+    },
+    "accessibility-testing-strategy": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessibility-decisions/skills/accessibility-testing-strategy/SKILL.md",
+      "computedHash": "c71226fb3881cccd00575666df5afbc907fccc0e279577dad25a8699df7d2c77"
+    },
+    "aesthetic-usability": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/aesthetic-usability/SKILL.md",
+      "computedHash": "b0df347318a3e1cbf7fb367bfc8ed42abe0ea4927ae859930bd567722cfecf3c"
+    },
+    "affinity-diagram": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/affinity-diagram/SKILL.md",
+      "computedHash": "1d03a439a56db0bf6de1691851ce5f3488358f2e12cb2da6659b64313d0db78d"
+    },
+    "alt-text-design": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/alt-text-design/SKILL.md",
+      "computedHash": "72b743990f71c85ce8db9059683a029d32e64fa0bdfa197d66a5deefc3d3a3d8"
+    },
+    "animation-principles": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/animation-principles/SKILL.md",
+      "computedHash": "09ee44becaf8d48638166a9af1d09bf041c2d7fa74496740a2cac05f9cdd0225"
+    },
+    "assess-load": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/assess-load/SKILL.md",
+      "computedHash": "e640aac34f7e5c5cf5469b1c0b4c387040ab43e077cd6d90d39a688db22f5b7b"
+    },
+    "assistive-technology-scenarios": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/assistive-technology-scenarios/SKILL.md",
+      "computedHash": "3534790613a38aed0740155960698c3d91bde7ad3b0f4f24ad1b503698436b5c"
+    },
+    "audit": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/audit/SKILL.md",
+      "computedHash": "3c320c7d0ffa7b3fb5849397f9651196fd0cf11b71149e3a05ba3645f74edbbf"
+    },
+    "audit-stories": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/audit-stories/SKILL.md",
+      "computedHash": "8d4bcfd636171a1c6323708d41609be163f337933b320ee33458e06b26a49e10"
+    },
+    "better-icons": {
+      "source": "better-auth/better-icons",
+      "sourceType": "github",
+      "skillPath": "skills/SKILL.md",
+      "computedHash": "656a618d6d5d5e9c567253eff57a06bee3be5d4fb983bdc401a46a209c5b76de"
+    },
+    "brandkit": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/brandkit/SKILL.md",
+      "computedHash": "b63012f3c3d21197e0185d3e9cc7ec40c589fb10e0b5a32a561739de31aa3f20"
+    },
+    "business-design": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/business-design/SKILL.md",
+      "computedHash": "2a4787321a0c788fb0e42f1b2ad3af66b8695137e29fd92131fe97358ae2fbae"
+    },
+    "card-sort-analysis": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/card-sort-analysis/SKILL.md",
+      "computedHash": "d98fe9fbbb59088e8465edc02ecafa7094636d33de5bc8a2063338523260272c"
+    },
+    "case-study": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "designer-toolkit/skills/case-study/SKILL.md",
+      "computedHash": "765afbd709978c15742c1b115f0d1cb079e0a3d8bd01304dcbaa411b0e436723"
+    },
+    "click-test-plan": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "prototyping-testing/skills/click-test-plan/SKILL.md",
+      "computedHash": "4c7662212818bfb53f1a186ec2c9fbc72c213ee1064d9f4c3ba578823ba52912"
+    },
+    "cognitive-load-assessment": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/cognitive-load-assessment/SKILL.md",
+      "computedHash": "f69cb78b73edbfb72bb5c86e9a2441e4cd63b5b3294e9694db56afaba9df50d6"
+    },
+    "color-system": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/color-system/SKILL.md",
+      "computedHash": "e273ec32da74094fbb497bd6eb39bbc6340b61584d6c37997d652b30f5ee3f7b"
+    },
+    "colour-independence": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/colour-independence/SKILL.md",
+      "computedHash": "cdab73d77603c8cdd1e599c87f1c9cc676d3811da91b2637eaa0ff07481f010e"
+    },
+    "competitive-analysis": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/competitive-analysis/SKILL.md",
+      "computedHash": "93abc95b8090a667000a4d94ef85649cff48cef1ca1d77abb2ad70a778eb0007"
+    },
+    "compliance-mapping": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessibility-decisions/skills/compliance-mapping/SKILL.md",
+      "computedHash": "0ae19f3c05276b10e61f4dfbfab99d44aade7fadf78ecc60d4d8b71d4163cba2"
+    },
+    "component-spec": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/component-spec/SKILL.md",
+      "computedHash": "7f13e510f41a91c14a494f16c6fff5825201eafa8c2cecdf08f353a60ede560b"
+    },
+    "content-strategy": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/content-strategy/SKILL.md",
+      "computedHash": "d3d52146ce9b80be96ae6e4af3ea08c98c1ed07089f22a803f15ba2dd01de944"
+    },
+    "contextual-help-design": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/adaptive-personalisation/SKILL.md",
+      "computedHash": "495f4cdacf1a7ab1049d553d8158b09b137249f13e9156d11b3463bfc76e2bc8"
+    },
+    "critique-affordance": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "visual-critique/skills/critique-affordance/SKILL.md",
+      "computedHash": "c19abea8cac18d41b5b81532cef9b08c3c95a014e0a613cd4e4b3dad95660121"
+    },
+    "critique-brand-consistency": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "visual-critique/skills/critique-brand-consistency/SKILL.md",
+      "computedHash": "2813d937f9b8a381358d6847773e73f41e60d33d9094e8937f8f1427e5d52763"
+    },
+    "critique-color": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "visual-critique/skills/critique-color/SKILL.md",
+      "computedHash": "d0e90b7890acfb2b5782810b80c24aac52e105f8d808cba23af3d748fd547df2"
+    },
+    "critique-composition": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "visual-critique/skills/critique-composition/SKILL.md",
+      "computedHash": "418cb5e3b3b70b0fba19d129f028ff25ed52f03a0dd3e64ac40172ed56b2a7a5"
+    },
+    "critique-information-density": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "visual-critique/skills/critique-information-density/SKILL.md",
+      "computedHash": "996cf0819bf7b8330dc6d012c9f7ef71b7bd4f892eda84e3e0f8ef8c4a12df9b"
+    },
+    "critique-typography": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "visual-critique/skills/critique-typography/SKILL.md",
+      "computedHash": "8a854441c3e7352658b937b9c137c99de3bd29d97c22d24ffd28498c0659f3ef"
+    },
+    "critique-visual-hierarchy": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "visual-critique/skills/critique-visual-hierarchy/SKILL.md",
+      "computedHash": "c49261e33c468bd140046dcaf53cb9b7c16360305de8f90a8a496503fc8fd8da"
+    },
+    "dark-mode-design": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/dark-mode-design/SKILL.md",
+      "computedHash": "521eeba531ff2192df390956126507ecf250d3b16f9ef7688f67c9169c935838"
+    },
+    "data-visualization": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/data-visualization/SKILL.md",
+      "computedHash": "640f408d628fa774fd6300038bc555248159f0e60387aff374f00c620254535d"
+    },
+    "decision-documentation": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessibility-decisions/skills/decision-documentation/SKILL.md",
+      "computedHash": "9fd9a2f05cf1085452395f0f1a03c24291f2908a878a1d9d6618d9e7506f847b"
+    },
+    "deploy-to-vercel": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/deploy-to-vercel/SKILL.md",
+      "computedHash": "03e0eaaa9bf13ba1e7ffa387f5893de6f324c0868c627001f179395a8feaa7c9"
+    },
+    "design-brief": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/design-brief/SKILL.md",
+      "computedHash": "c770553410b53e14703582d889910cc2bd284b551286815f33ec7eecf10b3344"
+    },
+    "design-critique": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/design-critique/SKILL.md",
+      "computedHash": "176c87e444147c35236495f5416bab9fa9287610efd509a73138f700f60b75aa"
+    },
+    "design-debt-audit": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/design-debt-audit/SKILL.md",
+      "computedHash": "7ac785b9a44110512f2c1122891aa19904408be970ca786ddb1759b95c70ffcb"
+    },
+    "design-flow": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/design-flow/SKILL.md",
+      "computedHash": "62fed998ee9c9c05bf976926689b1aa09494f4608cc258b27d108f1f715e8032"
+    },
+    "design-impact-reporting": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/design-impact-reporting/SKILL.md",
+      "computedHash": "7ed0305fd11f93a0a49205d7bceb79ac5dc815a25e5f051b1d881630f35334c4"
+    },
+    "design-lab": {
+      "source": "0xdesign/design-plugin",
+      "sourceType": "github",
+      "skillPath": "design-and-refine/skills/design-lab/SKILL.md",
+      "computedHash": "2f91bff63e6e749642f966510755b8912d5d53e56de3f0fb4a86bc8c604da192"
+    },
+    "design-negotiation": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "designer-toolkit/skills/design-negotiation/SKILL.md",
+      "computedHash": "e5db125f7a799189c1f7676473563b08fbda14b758f1cc35ba95f26e3c294bc6"
+    },
+    "design-principles": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/design-principles/SKILL.md",
+      "computedHash": "d2a325f208b23f3b0bf7f50737061a182d0f16235d661c4a431eea3eebfeaab4"
+    },
+    "design-qa-checklist": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/design-qa-checklist/SKILL.md",
+      "computedHash": "596805c8a9850acc8d36583a3f0afcf53b8c969a16383659822afc9246727692"
+    },
+    "design-rationale": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "designer-toolkit/skills/design-rationale/SKILL.md",
+      "computedHash": "a717add06da8161836b8da205e298d8b97fa8e9a2647cd79ac76e653abe0c296"
+    },
+    "design-review-process": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/design-review-process/SKILL.md",
+      "computedHash": "142384a87e472c63fb391e873338b002c9b0ce164de078a21bd91eb9340519d6"
+    },
+    "design-sprint-plan": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/design-sprint-plan/SKILL.md",
+      "computedHash": "f94271fe118b951469c173bdd57694c524416d6947a3ed853fc230d5d1320ece"
+    },
+    "design-system-adoption": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "designer-toolkit/skills/design-system-adoption/SKILL.md",
+      "computedHash": "5835c7f5beaf56e747fa93028844644446c44b4f971b0175e017eae5d0d3df33"
+    },
+    "design-system-governance": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/design-system-governance/SKILL.md",
+      "computedHash": "9ff33c8a07cf03e1dfd6122b641b132d1903a86f78a7846ace1aa569a27d1b57"
+    },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "6d838b246d0e35d0b53f4f23f98ba7a1dd561937e64f7d0c7553b0928e376c3e"
+    },
+    "design-taste-frontend-v1": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill-v1/SKILL.md",
+      "computedHash": "d704ab912c4d0ca954ffa858983da755ae4cd5cad9ba22554db5557382f5bd34"
+    },
+    "design-token": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/design-token/SKILL.md",
+      "computedHash": "13d408ed09d2f7bf6ef2495430fcc25d1240a186e4396efd1badaeb4c84d3a0b"
+    },
+    "design-token-audit": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "designer-toolkit/skills/design-token-audit/SKILL.md",
+      "computedHash": "9c7a6c5059051c763b98395a7f9b193ac985c13d959bb52c6951fbbf4c97cf2b"
+    },
+    "diary-study-plan": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/diary-study-plan/SKILL.md",
+      "computedHash": "2a493bfb844b4a562e2b5cd59c3fa40e4b11327ff9b96454aa9f468f285d0872"
+    },
+    "disability-inclusive-personas": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/disability-inclusive-personas/SKILL.md",
+      "computedHash": "4c0ebf5f12a6d9b4b4b0b18de22316cb55f52f7dfa06d7c5707eb5a4cc7e25f6"
+    },
+    "document": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessibility-decisions/skills/document/SKILL.md",
+      "computedHash": "817458703aeec99d4af017b9e8a3bef907b437f2710cfc74fb81989bbcc54390"
+    },
+    "documentation-template": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/documentation-template/SKILL.md",
+      "computedHash": "3269f7e1dbe24f15902800f27b3e99e2eb507a5c43266b940706d2fa8369e8e0"
+    },
+    "doherty-threshold": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/doherty-threshold/SKILL.md",
+      "computedHash": "3d9d9a3ec839603a8416fff16c6c1cb715e07f1f9258468858f72a5697040cbf"
+    },
+    "edge-case-identification": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/edge-case-identification/SKILL.md",
+      "computedHash": "76bb88bad846d88f4ea18b433a99688c866a7b2d9179460e7aeb7a8c5fe08661"
+    },
+    "empathy-map": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/empathy-map/SKILL.md",
+      "computedHash": "8fc1afd73161dd522f755ab3d286cfa2ef5384c464a5a2746cf7765b011d6b9a"
+    },
+    "error-handling-ux": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/error-handling-ux/SKILL.md",
+      "computedHash": "2cc819d2f01a7f1d74c0c976a1b5c56bdb97c30affae1d748bfe02cb3017ec8a"
+    },
+    "error-prevention-recovery": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/error-prevention-recovery/SKILL.md",
+      "computedHash": "974e0ce8deda34c69cc3d40da20325604e5797c0096d1e6a45e5b0fc87bcfe61"
+    },
+    "experience-map": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/experience-map/SKILL.md",
+      "computedHash": "19e8efd2d3d90ee5168726f1ebdff71f494e1f5de02658c53222021639de09fc"
+    },
+    "feedback-and-status": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/feedback-and-status/SKILL.md",
+      "computedHash": "501745fdd1beaa80b4779d4e06b431c07f721dfadc344b6e5eca0975c612850a"
+    },
+    "feedback-patterns": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/feedback-patterns/SKILL.md",
+      "computedHash": "4944c5f3bfcccbe8b8eb5b0e014dd90fa1720e9142b25c3828366d004989ff2d"
+    },
+    "fitts-law": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/fitts-law/SKILL.md",
+      "computedHash": "13b4e9ac68e07c094f66b23c48f991603a34488fadbaef16448823a4ebd6985b"
+    },
+    "flexible-typography": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/flexible-typography/SKILL.md",
+      "computedHash": "9fc350ea6fffe87d8bf56322501c4787eb22b8b41201a6eaa458f5cfb39b3f40"
+    },
+    "focus-attention-design": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/focus-attention-design/SKILL.md",
+      "computedHash": "ce69f90aa2e8bdb571c15a9ec5ac7e98da3a07c7aa2ad3f176389f18ad71cb20"
+    },
+    "form-design": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/form-design/SKILL.md",
+      "computedHash": "e35fe0a35c5e453a1b58c08ba80b13ca7cd4d83f19e7355e14a3ca96252624c6"
+    },
+    "form-labelling": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/form-labelling/SKILL.md",
+      "computedHash": "30ee319dd3663954fd7c3ba7b296793cfecdc635a3a7966899c54d82f9a69163"
+    },
+    "full-output-enforcement": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/output-skill/SKILL.md",
+      "computedHash": "26bd29ce4c5e02c7666b2d503609bf466bd32290822e91f0e984147048dbb924"
+    },
+    "generate": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/generate/SKILL.md",
+      "computedHash": "5c27a9da95bcb303dd7cde7f3a76eb71d555db99da42505768079d72ff72ce7d"
+    },
+    "gesture-alternatives": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/gesture-alternatives/SKILL.md",
+      "computedHash": "0d561266aedcec151c4e6f1494bf9bb2bd7852307b759d58424b03749608dc2f"
+    },
+    "gesture-patterns": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/gesture-patterns/SKILL.md",
+      "computedHash": "43222e5ddb8dd80e2a304c021442409707e27400cce6ea8cd7795473d8f0d7c8"
+    },
+    "gpt-taste": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/gpt-tasteskill/SKILL.md",
+      "computedHash": "cc8f0c601d8240a124e1d11634351a2be7b8a72fd807c75e5b6bf7afcd5ddee0"
+    },
+    "handoff": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessibility-decisions/skills/handoff/SKILL.md",
+      "computedHash": "478b379714ced9c2ca1c693dc58f534650ba75e2ce4e0cf25dab60177e79e8bf"
+    },
+    "handoff-spec": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/handoff-spec/SKILL.md",
+      "computedHash": "af46a3d7e3885bd088c37cf6d4ca8066a7d58f1aeaa2cf45e2ef0bd92cc10347"
+    },
+    "heading-structure": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/heading-structure/SKILL.md",
+      "computedHash": "5566c3837a97f7c12334b0c5f9a8a2933e315ed78584f7990ab6484710ee8c51"
+    },
+    "heuristic-evaluation": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "prototyping-testing/skills/heuristic-evaluation/SKILL.md",
+      "computedHash": "33357870b71c9153d2d614ca5f1b9240c794bb1f5ed9d4e73f16de832e65a4be"
+    },
+    "hicks-law": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/hicks-law/SKILL.md",
+      "computedHash": "2f891c2d624466bfe9314435c604b3e2ddab1991b146957d712f72dbb1fcb563"
+    },
+    "high-end-visual-design": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/soft-skill/SKILL.md",
+      "computedHash": "7db385e4c5370e5a7fca9704a1361b056e4504ea6a03924bb86f33a4f00b5c73"
+    },
+    "icon-system": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/icon-system/SKILL.md",
+      "computedHash": "b83d3d2c18814218d454ae8e29a13fb1653d2752a904b8bfb9b86af86e5530d9"
+    },
+    "illustration-style": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/illustration-style/SKILL.md",
+      "computedHash": "e132ebf617da8d26df00cd21e80ed7ec76b32debb5bd3816248a090e634ad653"
+    },
+    "image-to-code": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/image-to-code-skill/SKILL.md",
+      "computedHash": "58517b03b2a01f4c9ba65861559d03df931400871bbc200978c975b24bb92c73"
+    },
+    "imagegen-frontend-mobile": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/imagegen-frontend-mobile/SKILL.md",
+      "computedHash": "9ab7f4f6ce66a3cff02bbf5894e5bd5af50bf5d6ef0adffdc88e8fab772fe44f"
+    },
+    "imagegen-frontend-web": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/imagegen-frontend-web/SKILL.md",
+      "computedHash": "65f5ae59fa317567809438310b1c54f78cd133426deb43e4d3d4ca4c8f541628"
+    },
+    "inclusive-user-stories": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/inclusive-user-stories/SKILL.md",
+      "computedHash": "59e96dd83fd19e2d8d97a884f6912f5b39ba63ad1fe5a780818c7161f8bb5841"
+    },
+    "industrial-brutalist-ui": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/brutalist-skill/SKILL.md",
+      "computedHash": "8fc355c4aadb7d29c53ca28bc41be3cd6eea765d121e3737c4dc2d0f90a8effa"
+    },
+    "information-architecture": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/information-architecture/SKILL.md",
+      "computedHash": "38a52538e29da88d69e4efa7099fd0ba284d5a09df10060cf8f47e521f02a72c"
+    },
+    "information-density": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/information-density/SKILL.md",
+      "computedHash": "79ad0b71444409649bb2195dce2585ed206a9d59c5d507517928c872ba991cdb"
+    },
+    "interfaces-that-feel": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/interfaces-that-feel/SKILL.md",
+      "computedHash": "ce2cac044a63144bd215f2e631363c8a606b6057faaa86489b13d2a92139b2ac"
+    },
+    "interview-script": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/interview-script/SKILL.md",
+      "computedHash": "74f707c8722e6ef34a8a1eb8097a6c3ae36c439af9ba82f2a1efa0f464654cb2"
+    },
+    "jobs-to-be-done": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/jobs-to-be-done/SKILL.md",
+      "computedHash": "a477497452f84b538285c1517d02da8d9aa85f1a7fe06c76bf1afd10d46bbe24"
+    },
+    "journey-map": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/journey-map/SKILL.md",
+      "computedHash": "201b4ac820efe88b3ca99fb33daf2f8bc00a210bcee9037b2bc719e327b5bc7a"
+    },
+    "keyboard-navigation": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/keyboard-navigation/SKILL.md",
+      "computedHash": "8fe0e3ce5c6e1e57921d6eb82f9f0ba759fa406a746b0dc08fd2e5aed7d6906b"
+    },
+    "keyboard-review": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/keyboard-review/SKILL.md",
+      "computedHash": "7eada682325a86f5dd077dd20f4d87472aaec8ddc0c75411e4264d61321ebb11"
+    },
+    "law-of-common-region": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/law-of-common-region/SKILL.md",
+      "computedHash": "e3557f87ba309854f53738c95f5afad48ab659eda47b547e6c8086c918b58f35"
+    },
+    "law-of-proximity": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/law-of-proximity/SKILL.md",
+      "computedHash": "1b85123ef3f2e024073901b6db807570718ba5a4bc3695a3e8866ff348c6d535"
+    },
+    "layout-grid": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/layout-grid/SKILL.md",
+      "computedHash": "baafc9cdb58f8c52d46f0116fafdb5cb188af9749a6aa1409cad8a2ac412f6e2"
+    },
+    "link-text-design": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/link-text-design/SKILL.md",
+      "computedHash": "da187321c784bcbaccdc827227d738735cefb5efc8ca8573b9eda571727db3fb"
+    },
+    "loading-states": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/loading-states/SKILL.md",
+      "computedHash": "a6bcded656c70205a6fd99016a63d2dc6eb9e4e9d76a9d8c901723fb8955b074"
+    },
+    "localization-design": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/localization-design/SKILL.md",
+      "computedHash": "7e6c912d87192a679a6704510c22b76dadbb3e4850abcedc42fa84b86b686e1a"
+    },
+    "make-interfaces-feel-better": {
+      "source": "jakubkrehel/make-interfaces-feel-better",
+      "sourceType": "github",
+      "skillPath": "skills/make-interfaces-feel-better/SKILL.md",
+      "computedHash": "54b6e221bbe4e2d1a8461c3f9ecabe69daf891f964e9ee5e699c323daa018f2e"
+    },
+    "memory-load-reduction": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/memory-load-reduction/SKILL.md",
+      "computedHash": "6ff430e485c9c61e8d96a6f2e1b8b06b42168d8ec2c404476cb0773502849802"
+    },
+    "metrics-definition": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/metrics-definition/SKILL.md",
+      "computedHash": "f4744d25695a9e2913ec6c4b531cd8f2d190f1529685a31c2cf45c0a0624cdf6"
+    },
+    "micro-interaction-spec": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/micro-interaction-spec/SKILL.md",
+      "computedHash": "b3c84fbaf2b9961342678822e5edb71c83b6e8e6f47759d9b213192daedf0499"
+    },
+    "millers-law": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/millers-law/SKILL.md",
+      "computedHash": "73a3cbaab532ce70677f456e47c0ef04b0993e23bc531c98b6dcec67c5570e57"
+    },
+    "minimalist-ui": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/minimalist-skill/SKILL.md",
+      "computedHash": "08873a3131d3be27bef9bf3304b310b16b44ca6e3561aebe532797be3443f6bd"
+    },
+    "motion-sensitivity": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/motion-sensitivity/SKILL.md",
+      "computedHash": "3593c1c161447ec88e1b56aa0d1f833b022647f29114522e437b86216ab8d825"
+    },
+    "motion-system": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/motion-system/SKILL.md",
+      "computedHash": "557ac8e1284cce9b29ce146349b6258130084b7b157de9e24843f26ff66cb05d"
+    },
+    "multi-modal-input": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/multi-modal-input/SKILL.md",
+      "computedHash": "f7de9b28daf89ebb9725c3a52168f1b6aaa9a9bd1da87a6635510bf9003597b7"
+    },
+    "multimedia-accessibility": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/multimedia-accessibility/SKILL.md",
+      "computedHash": "32a504533651a7cfa5b04978198b58036cc79ef72c694eb87df781d4dc092caf"
+    },
+    "naming-convention": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/naming-convention/SKILL.md",
+      "computedHash": "e50b9223a789fa19e54dc5d049be3f871d59f62f04e4f188c7e3fbf82d6846a7"
+    },
+    "navigation-patterns": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/navigation-patterns/SKILL.md",
+      "computedHash": "ac8065d106e3bad226306b9b3c133f00c7353970b5545000934bb76453356fc9"
+    },
+    "north-star-vision": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/north-star-vision/SKILL.md",
+      "computedHash": "782d59a634250bf6bd738d56cdb0c8122329044c2a7feaa6758a68e971baa863"
+    },
+    "onboarding-design": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/onboarding-design/SKILL.md",
+      "computedHash": "e8ba8e005be89920948b72c1d8c7018a6743a9b33a78f55730fe129d78a2fba8"
+    },
+    "opportunity-framework": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/opportunity-framework/SKILL.md",
+      "computedHash": "d323703e549cb9241d6ae688d4a8756a9356684c0e953b16be63a675241106e9"
+    },
+    "pattern-library": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/pattern-library/SKILL.md",
+      "computedHash": "b76e7a9e70fce0c3575e1b23e128d108ab0077bf175b897f4b87a65e7cc7bfd6"
+    },
+    "plain-language-design": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/plain-language-design/SKILL.md",
+      "computedHash": "46e07ecdea1d6609054e6741cf947abe3148405ec4d16ba2665415d658ee9e61"
+    },
+    "preference-audit": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/preference-audit/SKILL.md",
+      "computedHash": "73716f5a79d61476ed142b4b306f1bb61a11b7b082537a453b136932f9015df0"
+    },
+    "presentation-deck": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "designer-toolkit/skills/presentation-deck/SKILL.md",
+      "computedHash": "f9aa2f651fb20b729a32e8ce95f52409329480959667837a14265e4ff1cdefe7"
+    },
+    "prototype-strategy": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "prototyping-testing/skills/prototype-strategy/SKILL.md",
+      "computedHash": "fd1a04de726e3eb3b0916893fdd8a4991107c7b60504cf57136c57c63430918f"
+    },
+    "readable-content": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/readable-content/SKILL.md",
+      "computedHash": "e24f7112bbda9bd4d74ab158a05e4bcb9fda51dceadf02be086e7306a9866960"
+    },
+    "readable-measure": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/readable-measure/SKILL.md",
+      "computedHash": "71f35ee197a7c40d2dca1328643078accc6876fc98ed9336f5a2e88023fcd348"
+    },
+    "redesign-existing-projects": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/redesign-skill/SKILL.md",
+      "computedHash": "b405eee0e0e80fc243f731d9aa368bca307e356db7e6157d27101d369dac6726"
+    },
+    "research-repository": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/research-repository/SKILL.md",
+      "computedHash": "afc832194e6a018fea86c30f57e14e8562fab458fc06665127a43c7ae79af75b"
+    },
+    "responsive-accessibility": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/responsive-accessibility/SKILL.md",
+      "computedHash": "aa6f536bd40f7bda71214bc7e0559e590fdec539cadca3366a420e32e8b76c5d"
+    },
+    "responsive-design": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/responsive-design/SKILL.md",
+      "computedHash": "a7fe79088a1d56bd85e2f989c372b5bdd8a7869c5d04b93748452e082de18cb6"
+    },
+    "responsive-review": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/responsive-review/SKILL.md",
+      "computedHash": "9e3640c0e4047a5e42078e80f49fc42bd6931bd1144b895646bd923ee98c2897"
+    },
+    "review": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/review/SKILL.md",
+      "computedHash": "9ad507fe69f611f9bf12f087c1e750d9fe564d7eb64fa765b20b99f46217f6e3"
+    },
+    "rewrite": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/rewrite/SKILL.md",
+      "computedHash": "ea99790ae6b8fe96d160cc2f698f777e5c50ef26c17a87c13d4f3e40811e93b0"
+    },
+    "scenario-map": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/scenario-map/SKILL.md",
+      "computedHash": "86c22d9fd1464157ed857d12d5c56c9a83c08d99bfa90fac2c5b0026c91281a2"
+    },
+    "search-ux": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/search-ux/SKILL.md",
+      "computedHash": "e0af08c212e60a1a11f659ce7d1c8379ba5f004f36f27978b2ca662bb66bb95b"
+    },
+    "service-blueprint": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/service-blueprint/SKILL.md",
+      "computedHash": "d1756dad664ea5efb71a948828326cce067462e1d88c0000c4101b27e2d06032"
+    },
+    "simplified-views": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/simplified-views/SKILL.md",
+      "computedHash": "edaaf4e85d3c1caacbf7c9afe37f0b04b0563406a77e64300efd3d9e6f08db45"
+    },
+    "simplify": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/simplify/SKILL.md",
+      "computedHash": "a18e98ef99f5a0c931b4e8cccbda6045cddc49acb8133ce30d56dd2516f59bab"
+    },
+    "situational-impairment-mapping": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-personas/skills/situational-impairment-mapping/SKILL.md",
+      "computedHash": "164705436d5feef1ad10012086b386237bcd2c6d5cee1ecca2b4c520589e0983"
+    },
+    "spacing-system": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/spacing-system/SKILL.md",
+      "computedHash": "895b326ceec32780b99ec29373efdcd2d16474306864ec98de5d3ea41635836e"
+    },
+    "specify": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/specify/SKILL.md",
+      "computedHash": "87d9bf36734a1a86b1a79280d0ad220157575501de67f918cc16573ed0bf2f41"
+    },
+    "stakeholder-alignment": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ux-strategy/skills/stakeholder-alignment/SKILL.md",
+      "computedHash": "58495619083de766ada7dcc587881a4c4ac6a05c1c816594d782b729e9c4a1db"
+    },
+    "stakeholder-communication": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessibility-decisions/skills/stakeholder-communication/SKILL.md",
+      "computedHash": "b2968175ed4df2219cf2f1c455c9b15d9c1547ba964c7eb1cca4dba7a2409dae"
+    },
+    "state-machine": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "interaction-design/skills/state-machine/SKILL.md",
+      "computedHash": "3de657494be27db1b785f65454063053c6e61ce825c86c7022fdbe6adc1557c1"
+    },
+    "stitch-design-taste": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/stitch-skill/SKILL.md",
+      "computedHash": "13322f38406cd3abf16ba45e35bdc9b18002d0153a79b4612b97aefc65d5a335"
+    },
+    "structure": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/structure/SKILL.md",
+      "computedHash": "262dbdcbdf3dffbe5e9985508e1c30475c03cf6c568abada19519ee04ade229f"
+    },
+    "summarize-interview": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/summarize-interview/SKILL.md",
+      "computedHash": "88749df51a9cda97f89cee50346db3cb1b9ff7a15094d9e24cca1ac60f0a3071"
+    },
+    "survey-design": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/survey-design/SKILL.md",
+      "computedHash": "beb6d5fd0a961f28f45532adef6acfd39b21e145d10a675d3bed73e33fb94e84"
+    },
+    "table-accessibility": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessible-content/skills/table-accessibility/SKILL.md",
+      "computedHash": "061fa8121f780398cb769157e7d0f78f3262da3fbda51f05b91f894948df6b2d"
+    },
+    "team-workflow": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/team-workflow/SKILL.md",
+      "computedHash": "9e6ec734363b9ed4ed5b328fc53f8567b2c79659b478371a0cf0e41808acd353"
+    },
+    "test-scenario": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "prototyping-testing/skills/test-scenario/SKILL.md",
+      "computedHash": "54ddeca1353381cd77f1ecd8ab754557e6fc320d07e580024caa19e7f0e2ed46"
+    },
+    "theming-system": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-systems/skills/theming-system/SKILL.md",
+      "computedHash": "30d8d7d0bc80d269726f12a2f8de56d36ee0424ab872f0070d12bc498fed5b19"
+    },
+    "touch-target-design": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/touch-target-design/SKILL.md",
+      "computedHash": "3aac067f90cbd8f73bf55bbecb071af75e990d72979bd5ed5f47e72aa731260c"
+    },
+    "tradeoff-analysis": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "accessibility-decisions/skills/tradeoff-analysis/SKILL.md",
+      "computedHash": "d666b85f8760efc08b1c502b8488624c2bb847ed11c849f7fa16aa365f460121"
+    },
+    "typography-scale": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/typography-scale/SKILL.md",
+      "computedHash": "2ab442a62f1ecc618ab4458a29372c88c5ec3f904209b358003772d96a99a9f9"
+    },
+    "usability-test-plan": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/usability-test-plan/SKILL.md",
+      "computedHash": "63a9106d0ff0b62acd708f63b236f3aad51e87cd1466998c8a7491712433b74c"
+    },
+    "user-flow-diagram": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "prototyping-testing/skills/user-flow-diagram/SKILL.md",
+      "computedHash": "d5c3319e8f2bf605567454d2ca27191d6576af26c6b3ab82025025f20fa235ed"
+    },
+    "user-persona": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-research/skills/user-persona/SKILL.md",
+      "computedHash": "13cbc0a741ea90f8172df24164ef96e1c165b55af964d39dfe814e84119a2eaf"
+    },
+    "user-preference-respect": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "adaptive-interfaces/skills/user-preference-respect/SKILL.md",
+      "computedHash": "5db93335f83b847f52e8a296b56d86b591c42606fc289ecf80bd8642eda773cf"
+    },
+    "ux-writing": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "designer-toolkit/skills/ux-writing/SKILL.md",
+      "computedHash": "05eba31804518a2f674c67ba320e2ddb9acc8cab7150a931aa33216fa615e427"
+    },
+    "vercel-cli-with-tokens": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vercel-cli-with-tokens/SKILL.md",
+      "computedHash": "eb16b20dcbe6ce51e0372083d624e0847af1b09487ec99249227d5a8eddebfc0"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/composition-patterns/SKILL.md",
+      "computedHash": "575757e3e25761c8c562d6e395d29f0b76c98b1273c0bd72d88e6ab1bc9c7d42"
+    },
+    "vercel-optimize": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vercel-optimize/SKILL.md",
+      "computedHash": "ad0ef9c5c980f824e2ec19cba5c45426aba923a17e71fbaf6d1830574b62cc44"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+    },
+    "vercel-react-native-skills": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-native-skills/SKILL.md",
+      "computedHash": "41d24eafa7c3d82e270439808f7cfbc4d51aeb2d14f2809a2267c16275784d06"
+    },
+    "vercel-react-view-transitions": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-view-transitions/SKILL.md",
+      "computedHash": "c8952fc9127fa0564d0cb71dccb4215a5608ac933b5831104f09173a97a46f85"
+    },
+    "version-control-strategy": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-ops/skills/version-control-strategy/SKILL.md",
+      "computedHash": "8bfcd7304da639492b32b4dc0f6de9d55090c814042b71c3fb77a2f3afcb78ee"
+    },
+    "visual-hierarchy": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/visual-hierarchy/SKILL.md",
+      "computedHash": "f8cc919884a4752f54303b4e07af8db630503e058aefd3197dce1d1a5eb9c3ff"
+    },
+    "voice-interaction": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "inclusive-interaction/skills/voice-interaction/SKILL.md",
+      "computedHash": "0ce56b58cc6835b59086ac4388d415c7e61b16c9ea5d9f84dc168341a5492639"
+    },
+    "von-restorff-effect": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "ui-design/skills/von-restorff-effect/SKILL.md",
+      "computedHash": "8e600d2628cd8256c8dac14c0b4c7bed4267ab1231288e5f8e04eba6222a4a58"
+    },
+    "wayfinding-navigation": {
+      "source": "Owl-Listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/wayfinding-navigation/SKILL.md",
+      "computedHash": "fc327785568ea1487192678af22ad09d7a755f7e15c5c2206647643140f72e1a"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
+    },
+    "wireframe-spec": {
+      "source": "Owl-Listener/designer-skills",
+      "sourceType": "github",
+      "skillPath": "prototyping-testing/skills/wireframe-spec/SKILL.md",
+      "computedHash": "790a9e40f32453f4e2de4aac5ad8883a0aecb70b765b2201aa9370a37850bd37"
+    },
+    "writing-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/writing-guidelines/SKILL.md",
+      "computedHash": "25aa3a33a97bddbcb1847ce4a6169106ec25e5b19b15b99c66e75ab383866ef2"
+    }
+  }
+}
