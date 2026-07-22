@@ -38,8 +38,11 @@ else:
             key, value = line.split("=", 1)
             os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
-HOST = os.getenv("REVIEWLENS_HOST", "127.0.0.1")
-PORT = int(os.getenv("REVIEWLENS_PORT", "8080"))
+HOST = os.getenv(
+    "REVIEWLENS_HOST",
+    "0.0.0.0" if os.getenv("RAILWAY_ENVIRONMENT") else "127.0.0.1",
+)
+PORT = int(os.getenv("REVIEWLENS_PORT") or os.getenv("PORT") or "8080")
 COLLECTION_NAME = os.getenv("QDRANT_COLLECTION", "instagram_feedback")
 EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
 CHAT_MODEL = os.getenv("OPENROUTER_CHAT_MODEL", "openai/gpt-5.6-terra")

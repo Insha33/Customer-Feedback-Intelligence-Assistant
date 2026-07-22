@@ -1,0 +1,15 @@
+.git
+.env
+.venv
+__pycache__
+*.pyc
+node_modules
+web/node_modules
+web/.next
+web/out
+.agents
+.claude
+.codex
+test_*.py
+data/instagram_reviews_full.csv
+data/rag_ingestion_checkpoint.json
