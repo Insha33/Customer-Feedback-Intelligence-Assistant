@@ -11,6 +11,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from prompts import SYSTEM_PROMPT, build_user_prompt
+from reviewlens_ai_stream import (
+    StreamingChatDependencies,
+    stream_chat_response,
+)
 
 try:
     from dotenv import load_dotenv
@@ -36,14 +40,20 @@ HOST = os.getenv("REVIEWLENS_HOST", "127.0.0.1")
 PORT = int(os.getenv("REVIEWLENS_PORT", "8080"))
 COLLECTION_NAME = os.getenv("QDRANT_COLLECTION", "instagram_feedback")
 EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
-CHAT_MODEL = os.getenv("OPENROUTER_CHAT_MODEL", "openai/gpt-4.1-mini")
+CHAT_MODEL = os.getenv("OPENROUTER_CHAT_MODEL", "openai/gpt-5.6-terra")
 RETRIEVAL_LIMIT = int(os.getenv("RAG_RETRIEVAL_LIMIT", "6"))
 DENSE_LIMIT = int(os.getenv("RAG_DENSE_LIMIT", "28"))
 LEXICAL_LIMIT = int(os.getenv("RAG_LEXICAL_LIMIT", "28"))
 DOC_CACHE_SECONDS = int(os.getenv("RAG_DOC_CACHE_SECONDS", "300"))
 REVIEW_CSV = Path(os.getenv("REVIEWLENS_REVIEW_CSV", "data/instagram_reviews_rag.csv"))
+CORS_ORIGIN = os.getenv("REVIEWLENS_CORS_ORIGIN", "http://localhost:3000")
+CHAT_APP_PREFIX = "/frontend/chat-app"
 
 WORD_RE = re.compile(r"[a-z0-9']+")
+GREETING_RE = re.compile(
+    r"^(?:hi|hello|hey|hiya|howdy|good\s+(?:morning|afternoon|evening))[!.\s]*$",
+    re.IGNORECASE,
+)
 DOC_CACHE = {
     "loaded_at": 0,
     "docs": [],
@@ -563,6 +573,22 @@ def handle_chat(question):
     if not question:
         raise ValueError("Question is required.")
 
+    if GREETING_RE.fullmatch(question):
+        return {
+            "answer": (
+                "**Hello!** Ask me about customer pain points, recurring "
+                "themes, issue severity, or what to prioritize next."
+            ),
+            "sources": [],
+            "retrieval": {
+                "mode": "greeting",
+                "structured_analytics_used": False,
+                "dense_candidates": 0,
+                "lexical_candidates": 0,
+                "returned_contexts": 0,
+            },
+        }
+
     openai_client = get_openai_client()
     openrouter_client = get_openrouter_client()
     qdrant_client = get_qdrant_client()
@@ -622,13 +648,46 @@ def handle_chat(question):
     }
 
 
+STREAMING_CHAT_DEPENDENCIES = StreamingChatDependencies(
+    get_openai_client=get_openai_client,
+    get_openrouter_client=get_openrouter_client,
+    get_qdrant_client=get_qdrant_client,
+    structured_analytics_context=structured_analytics_context,
+    embed_query=embed_query,
+    load_qdrant_documents=load_qdrant_documents,
+    dense_search=dense_search,
+    lexical_search=lexical_search,
+    reciprocal_rank_fusion=reciprocal_rank_fusion,
+    build_context=build_context,
+    source_summary=source_summary,
+    build_user_prompt=build_user_prompt,
+    system_prompt=SYSTEM_PROMPT,
+    chat_model=CHAT_MODEL,
+    retrieval_limit=RETRIEVAL_LIMIT,
+    greeting_pattern=GREETING_RE,
+)
+
+
 class ReviewLensHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
-        if self.path.endswith((".html", ".js", ".css")) or self.path.startswith(
-            "/api/"
-        ):
+        if self.path.endswith((".html", ".js", ".css")):
             self.send_header("Cache-Control", "no-store")
+        if self.path.startswith("/api/"):
+            self.send_header("Access-Control-Allow-Origin", CORS_ORIGIN)
         super().end_headers()
+
+    def do_OPTIONS(self):
+        parsed = urlparse(self.path)
+        if parsed.path not in {"/api/chat", "/api/chat/stream"}:
+            return json_response(
+                self,
+                HTTPStatus.NOT_FOUND,
+                {"error": "Unknown API route."},
+            )
+        self.send_response(HTTPStatus.NO_CONTENT)
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.end_headers()
 
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -655,10 +714,27 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
                 },
             )
 
-        if parsed.path == "/":
+        if parsed.path in {"/chat", "/frontend/chat.html"}:
+            self.send_response(HTTPStatus.TEMPORARY_REDIRECT)
+            self.send_header("Location", f"{CHAT_APP_PREFIX}/")
+            self.end_headers()
+            return
+
+        if parsed.path == CHAT_APP_PREFIX or parsed.path.startswith(
+            f"{CHAT_APP_PREFIX}/"
+        ):
+            relative_path = parsed.path.removeprefix(CHAT_APP_PREFIX).lstrip("/")
+            if not relative_path or relative_path.endswith("/"):
+                relative_path = f"{relative_path}index.html"
+            if ".." in Path(relative_path).parts:
+                return json_response(
+                    self,
+                    HTTPStatus.BAD_REQUEST,
+                    {"error": "Invalid chat application path."},
+                )
+            self.path = f"/web/out/{relative_path}"
+        elif parsed.path == "/":
             self.path = "/frontend/"
-        elif parsed.path == "/chat":
-            self.path = "/frontend/chat.html"
         elif parsed.path == "/backlog":
             self.path = "/frontend/backlog.html"
 
@@ -667,7 +743,7 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         parsed = urlparse(self.path)
 
-        if parsed.path != "/api/chat":
+        if parsed.path not in {"/api/chat", "/api/chat/stream"}:
             return json_response(
                 self,
                 HTTPStatus.NOT_FOUND,
@@ -676,6 +752,12 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
 
         try:
             payload = read_json_body(self)
+            if parsed.path == "/api/chat/stream":
+                return stream_chat_response(
+                    self,
+                    payload,
+                    STREAMING_CHAT_DEPENDENCIES,
+                )
             result = handle_chat(payload.get("question"))
             return json_response(self, HTTPStatus.OK, result)
         except Exception as error:
@@ -690,7 +772,7 @@ def main():
     os.chdir(Path(__file__).resolve().parent)
     server = ThreadingHTTPServer((HOST, PORT), ReviewLensHandler)
     print(f"ReviewLens running at http://{HOST}:{PORT}/frontend/")
-    print(f"Ask AI page running at http://{HOST}:{PORT}/frontend/chat.html")
+    print(f"Ask AI page running at http://{HOST}:{PORT}{CHAT_APP_PREFIX}/")
     server.serve_forever()
 
 

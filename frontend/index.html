@@ -3,16 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ReviewLens Instagram Analysis</title>
-    <link rel="stylesheet" href="./styles.css?v=20260709-evidence-room" />
+    <title>ReviewLens - Customer signal intelligence</title>
+    <meta
+      name="description"
+      content="Turn customer reviews into evidence-backed product decisions."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+    />
+    <link rel="stylesheet" href="./styles.css?v=20260721-alignment" />
   </head>
-  <body>
+  <body class="is-loading">
     <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="app-shell">
       <aside class="sidebar" aria-label="Primary navigation">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">RL</span>
-          <span>ReviewLens</span>
+          <span class="brand-mark" aria-hidden="true">R</span>
+          <span>ReviewLens <small>Feedback intelligence</small></span>
         </div>
         <nav class="nav-list">
           <a
@@ -28,7 +38,7 @@
             <span class="nav-dot amber"></span>
             Backlog
           </a>
-          <a class="nav-item" href="./chat.html">
+          <a class="nav-item" href="./chat-app/">
             <span class="nav-dot green"></span>
             Ask AI
           </a>
@@ -44,55 +54,71 @@
       </aside>
 
       <main id="main-content" class="main" tabindex="-1">
-        <header class="topbar">
-          <div>
-            <span class="product-kicker">Instagram feedback dashboard</span>
-            <h1>Instagram Review Analysis</h1>
+        <header class="topbar overview-header">
+          <div class="header-copy">
+            <span class="product-kicker">Instagram review intelligence</span>
+            <h1>Customer signal, ready for decisions.</h1>
             <p class="page-subtitle">
-              Interactive app-store review intelligence for Instagram product
-              decisions.
+              ReviewLens turns noisy feedback from multiple customer channels
+              into clear product priorities, with the evidence attached.
             </p>
           </div>
-          <div class="controls" aria-label="Dashboard filters">
-            <label>
-              Category
-              <select id="categoryFilter"></select>
-            </label>
-            <label>
-              Sentiment
-              <select id="sentimentFilter"></select>
-            </label>
-            <button id="clearFilters" class="ghost-button" type="button">
-              Reset
-            </button>
+          <div class="header-workspace">
+            <div class="source-strip" aria-label="Current data source">
+              <div>
+                <span class="status-dot" aria-hidden="true"></span>
+                <span>Active source</span>
+                <strong>Instagram App Store</strong>
+              </div>
+              <span id="sourceReviewCount" class="source-count">Loading…</span>
+            </div>
+            <div class="filter-heading">
+              <strong>Refine this view</strong>
+              <span>Filters update every insight below</span>
+            </div>
+            <div class="controls" aria-label="Dashboard filters">
+              <label>
+                Category
+                <select id="categoryFilter"></select>
+              </label>
+              <label>
+                Sentiment
+                <select id="sentimentFilter"></select>
+              </label>
+              <button id="clearFilters" class="ghost-button" type="button">
+                Reset
+              </button>
+            </div>
           </div>
         </header>
 
         <section class="metrics-grid" aria-label="Key metrics">
-          <article class="metric-card metric-pink">
+          <article class="metric-card metric-featured">
             <div>
               <span class="metric-label">Largest customer pain</span>
               <strong id="topIssue">-</strong>
               <span id="topIssueShare">-</span>
             </div>
-            <span class="sparkline spark-purple" aria-hidden="true"></span>
+            <span class="sparkline spark-light" aria-hidden="true"></span>
           </article>
-          <article class="metric-card metric-blue">
-            <div>
-              <span class="metric-label">Needs immediate attention</span>
-              <strong id="criticalCount">-</strong>
-              <span id="criticalShare">-</span>
-            </div>
-            <span class="sparkline spark-red" aria-hidden="true"></span>
-          </article>
-          <article class="metric-card metric-mint">
-            <div>
-              <span class="metric-label">Satisfaction score</span>
-              <strong id="avgRating">-</strong>
-              <span id="ratingContext">-</span>
-            </div>
-            <span class="sparkline spark-teal" aria-hidden="true"></span>
-          </article>
+          <div class="metric-stack">
+            <article class="metric-card metric-blue">
+              <div>
+                <span class="metric-label">Needs immediate attention</span>
+                <strong id="criticalCount">-</strong>
+                <span id="criticalShare">-</span>
+              </div>
+              <span class="sparkline spark-red" aria-hidden="true"></span>
+            </article>
+            <article class="metric-card metric-mint">
+              <div>
+                <span class="metric-label">Satisfaction score</span>
+                <strong id="avgRating">-</strong>
+                <span id="ratingContext">-</span>
+              </div>
+              <span class="sparkline spark-teal" aria-hidden="true"></span>
+            </article>
+          </div>
         </section>
 
         <section id="overview" class="analysis-grid">
@@ -126,11 +152,10 @@
               <div>
                 <h2>AI Summary</h2>
                 <p>
-                  Product-readable insights generated from the current Instagram
-                  review view.
+                  Decision-ready themes and product implications synthesized
+                  from the feedback in your current view.
                 </p>
               </div>
-              <span id="summaryScope" class="panel-stat">Instagram</span>
             </div>
             <div id="aiSummaryList" class="ai-summary-list"></div>
           </article>
@@ -140,7 +165,7 @@
               <div>
                 <h2>Sentiment per Category</h2>
                 <p>
-                  Shows where Instagram problems are concentrated by issue type.
+                  Shows where negative sentiment is concentrated by issue type.
                 </p>
               </div>
             </div>
@@ -164,6 +189,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=20260709-evidence-room" defer></script>
+    <script src="./app.js?v=20260721-alignment" defer></script>
   </body>
 </html>

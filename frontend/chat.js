@@ -3,12 +3,71 @@ const chatPanel = document.querySelector(".chat-panel");
 const chatForm = document.querySelector("#chatForm");
 const questionInput = document.querySelector("#questionInput");
 const sendQuestion = document.querySelector("#sendQuestion");
+const chatError = document.querySelector("#chatError");
+const contextReviewCount = document.querySelector("#contextReviewCount");
+const BACKLOG_URL = "/data/backlog_recommendations.json";
 const WORKING_STATES = [
   "Reading the question",
   "Checking review metrics",
   "Retrieving matching reviews",
   "Drafting a concise answer",
 ];
+
+function resizeComposer() {
+  questionInput.style.height = "auto";
+  questionInput.style.height = `${Math.min(questionInput.scrollHeight, 132)}px`;
+}
+
+function appendInlineMarkdown(parent, text) {
+  const boldPattern = /\*\*(.+?)\*\*/g;
+  let cursor = 0;
+  let match;
+
+  while ((match = boldPattern.exec(text)) !== null) {
+    parent.append(document.createTextNode(text.slice(cursor, match.index)));
+    const strong = document.createElement("strong");
+    strong.textContent = match[1];
+    parent.append(strong);
+    cursor = match.index + match[0].length;
+  }
+
+  parent.append(document.createTextNode(text.slice(cursor)));
+}
+
+function renderAssistantContent(content) {
+  const container = document.createElement("div");
+  container.className = "message-content";
+  const lines = String(content || "").replace(/\r\n/g, "\n").split("\n");
+  let list = null;
+
+  lines.forEach((rawLine) => {
+    const line = rawLine.trim();
+
+    if (!line) {
+      list = null;
+      return;
+    }
+
+    const bullet = line.match(/^[-*]\s+(.+)$/);
+    if (bullet) {
+      if (!list) {
+        list = document.createElement("ul");
+        container.append(list);
+      }
+      const item = document.createElement("li");
+      appendInlineMarkdown(item, bullet[1]);
+      list.append(item);
+      return;
+    }
+
+    list = null;
+    const paragraph = document.createElement("p");
+    appendInlineMarkdown(paragraph, line.replace(/^#{1,3}\s+/, ""));
+    container.append(paragraph);
+  });
+
+  return container;
+}
 
 function appendMessage(role, content, sources = []) {
   chatPanel.classList.add("chat-active");
@@ -22,8 +81,14 @@ function appendMessage(role, content, sources = []) {
   const article = document.createElement("article");
   article.className = `message ${role}`;
 
-  const body = document.createElement("p");
-  body.textContent = content;
+  const body =
+    role === "assistant"
+      ? renderAssistantContent(content)
+      : document.createElement("p");
+
+  if (role !== "assistant") {
+    body.textContent = content;
+  }
 
   article.append(body);
 
@@ -93,6 +158,21 @@ function appendWorkingMessage() {
 function setLoading(isLoading) {
   sendQuestion.disabled = isLoading;
   questionInput.disabled = isLoading;
+  chatForm.setAttribute("aria-busy", String(isLoading));
+}
+
+async function loadContextMetadata() {
+  try {
+    const response = await fetch(BACKLOG_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const total = data.metadata?.total_reviews;
+    contextReviewCount.textContent = total
+      ? `${Number(total).toLocaleString()} reviews indexed`
+      : "Review index available";
+  } catch {
+    contextReviewCount.textContent = "Review index available";
+  }
 }
 
 async function readApiResponse(response) {
@@ -118,6 +198,7 @@ async function readApiResponse(response) {
 
 async function askQuestion(question) {
   setLoading(true);
+  chatError.textContent = "";
   const workingMessage = appendWorkingMessage();
 
   try {
@@ -138,7 +219,7 @@ async function askQuestion(question) {
     appendMessage("assistant", data.answer, data.sources || []);
   } catch (error) {
     workingMessage.remove();
-    appendMessage("assistant", `I could not answer that yet: ${error.message}`);
+    chatError.textContent = `Could not complete the request. ${error.message}`;
   } finally {
     setLoading(false);
     questionInput.focus();
@@ -155,12 +236,14 @@ chatForm.addEventListener("submit", (event) => {
 
   appendMessage("user", question);
   questionInput.value = "";
+  resizeComposer();
   askQuestion(question);
 });
 
 document.querySelectorAll("[data-prompt]").forEach((button) => {
   button.addEventListener("click", () => {
     questionInput.value = button.dataset.prompt;
+    resizeComposer();
     questionInput.focus();
   });
 });
@@ -173,3 +256,7 @@ questionInput.addEventListener("keydown", (event) => {
   event.preventDefault();
   chatForm.requestSubmit();
 });
+
+questionInput.addEventListener("input", resizeComposer);
+
+loadContextMetadata();

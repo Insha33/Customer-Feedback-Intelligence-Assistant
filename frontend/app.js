@@ -2,22 +2,22 @@ const DATA_URL = "/data/instagram_reviews_rag.csv";
 const BACKLOG_URL = "/data/backlog_recommendations.json";
 
 const SENTIMENT_COLORS = {
-  negative: "#d94f68",
-  neutral: "#d88922",
-  positive: "#2f9d91",
+  negative: "#d14f45",
+  neutral: "#ad741f",
+  positive: "#187d69",
 };
 
 const CATEGORY_COLORS = [
-  "#6554e8",
-  "#2f9d91",
-  "#d94f68",
-  "#d88922",
-  "#496fd8",
-  "#ff725e",
-  "#7c6fe0",
-  "#4ca99f",
-  "#b56979",
-  "#6f7288",
+  "#3157d5",
+  "#5675dc",
+  "#7189df",
+  "#8ea1e7",
+  "#2748b4",
+  "#536eb9",
+  "#7e8fbd",
+  "#415b9d",
+  "#7584a7",
+  "#9da8c1",
 ];
 
 const state = {
@@ -55,7 +55,7 @@ const els = {
   categoryPanelSubtitle: getElement("#categoryPanelSubtitle"),
   categoryChart: getElement("#categoryChart"),
   sentimentChart: getElement("#sentimentChart"),
-  summaryScope: getElement("#summaryScope"),
+  sourceReviewCount: getElement("#sourceReviewCount"),
   aiSummaryList: getElement("#aiSummaryList"),
   sentimentCategoryChart: getElement("#sentimentCategoryChart"),
   backlogLanes: getElement("#backlogLanes"),
@@ -476,6 +476,12 @@ function renderSentimentPerCategory(rows) {
       const negative = counts.negative || 0;
       const negativeRatio = total ? negative / total : 0;
       const averageRating = average(categoryRows, "user_rating");
+      const severity =
+        negativeRatio >= 0.8
+          ? "Critical"
+          : negativeRatio >= 0.55
+            ? "Watch"
+            : "Mixed";
 
       return {
         category,
@@ -485,37 +491,39 @@ function renderSentimentPerCategory(rows) {
         negative,
         negativeRatio,
         averageRating,
+        severity,
       };
     })
     .sort((a, b) => {
-      if (b.negative !== a.negative) {
-        return b.negative - a.negative;
+      const priorityOrder = { Critical: 0, Watch: 1, Mixed: 2 };
+      const priorityDifference =
+        priorityOrder[a.severity] - priorityOrder[b.severity];
+
+      if (priorityDifference !== 0) {
+        return priorityDifference;
       }
 
-      return b.negativeRatio - a.negativeRatio;
+      if (b.negativeRatio !== a.negativeRatio) {
+        return b.negativeRatio - a.negativeRatio;
+      }
+
+      return b.negative - a.negative;
     })
     .slice(0, 8);
 
   const rowsHtml = entries
     .map((entry) => {
-      const severity =
-        entry.negativeRatio >= 0.8
-          ? "Critical"
-          : entry.negativeRatio >= 0.55
-            ? "Watch"
-            : "Mixed";
-
       return `
-        <button class="sentiment-row" type="button" data-category="${escapeHtml(entry.category)}" aria-label="Open ${escapeHtml(entry.category)} deep dive: ${entry.total.toLocaleString()} reviews, ${entry.negative.toLocaleString()} negative, ${entry.positive.toLocaleString()} positive, average rating ${entry.averageRating.toFixed(1)}, ${severity} priority">
+        <button class="sentiment-row" type="button" data-category="${escapeHtml(entry.category)}" aria-label="Open ${escapeHtml(entry.category)} deep dive: ${entry.total.toLocaleString()} reviews, ${pct(entry.negative, entry.total)} negative, ${pct(entry.positive, entry.total)} positive, average rating ${entry.averageRating.toFixed(1)}, ${entry.severity} priority">
           <span class="sentiment-category">
             <strong>${escapeHtml(entry.category)}</strong>
             <small>${entry.total.toLocaleString()} reviews analyzed</small>
           </span>
           <span class="sentiment-value">${entry.total.toLocaleString()}</span>
-          <span class="sentiment-value negative">${entry.negative.toLocaleString()} <small>${pct(entry.negative, entry.total)}</small></span>
-          <span class="sentiment-value positive">${entry.positive.toLocaleString()} <small>${pct(entry.positive, entry.total)}</small></span>
+          <span class="sentiment-value negative">${pct(entry.negative, entry.total)}</span>
+          <span class="sentiment-value positive">${pct(entry.positive, entry.total)}</span>
           <span class="sentiment-value">${entry.averageRating.toFixed(1)}</span>
-          <span class="severity-pill ${severity.toLowerCase()}">${severity}</span>
+          <span class="severity-pill ${entry.severity.toLowerCase()}">${entry.severity}</span>
         </button>
       `;
     })
@@ -525,8 +533,8 @@ function renderSentimentPerCategory(rows) {
     <div class="sentiment-table-head" aria-hidden="true">
       <span>Issue category</span>
       <span>Total</span>
-      <span>Negative</span>
-      <span>Positive</span>
+      <span>Negative share</span>
+      <span>Positive share</span>
       <span>Avg rating</span>
       <span>Priority</span>
     </div>
@@ -592,10 +600,8 @@ function renderAiSummary(rows) {
     .map(([category]) => category)
     .join(", ");
 
-  els.summaryScope.textContent =
-    state.category === "All" ? "Instagram" : state.category;
   els.aiSummaryList.innerHTML = [
-    `Most Instagram feedback in this view clusters around ${topCategoryText || "the selected filters"}.`,
+    `Most feedback in this view clusters around ${topCategoryText || "the selected filters"}.`,
     `${negativeShare} of the current review set is negative, with the strongest concentration in ${negativeCategoryText || "the leading issue categories"}.`,
     productImplication(rows),
     positiveTop
@@ -650,7 +656,7 @@ function renderBacklog() {
           .map(
             (item) => `
               <article class="backlog-item backlog-preview-item">
-                <h3>${escapeHtml(item.action)}</h3>
+                <h4>${escapeHtml(item.action)}</h4>
                 <p>${escapeHtml(item.evidence || "")}</p>
                 <div class="backlog-meta">
                   ${(item.categories || [])
@@ -671,7 +677,7 @@ function renderBacklog() {
       return `
         <section class="backlog-lane" aria-label="${lane}">
           <div class="lane-title">
-            <span>${lane}</span>
+            <h3>${lane}</h3>
             <span class="lane-count ${laneClasses[lane]}">${laneItems.length}</span>
           </div>
           <div class="backlog-stack">${list}</div>
@@ -742,10 +748,13 @@ async function init() {
       throw new Error("The review CSV loaded but did not contain any rows.");
     }
 
+    els.sourceReviewCount.textContent = `${state.rows.length.toLocaleString()} reviews`;
     state.filtered = state.rows;
     setupFilters();
     render();
+    document.body.classList.remove("is-loading");
   } catch (error) {
+    document.body.classList.remove("is-loading");
     document.querySelector(".main").innerHTML = `
       <section class="panel">
         <h1>Unable to load review data</h1>

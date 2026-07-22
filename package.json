@@ -1,7 +1,9 @@
 {
   "scripts": {
-    "generate:backlog": "uv run python data/generate_backlog_recommendations.py --force",
-    "start:dashboard": "uv run python data/generate_backlog_recommendations.py --allow-stale-on-error && uv run python reviewlens_server.py"
+    "build:chat": "npm --prefix web run build",
+    "dev:chat": "npm --prefix web run dev",
+    "generate:backlog": "sh scripts/run_python.sh data/generate_backlog_recommendations.py --force",
+    "start:dashboard": "sh scripts/run_python.sh data/generate_backlog_recommendations.py --allow-stale-on-error && npm run build:chat && sh scripts/run_python.sh reviewlens_server.py"
   },
   "devDependencies": {
     "prettier": "3.8.4"

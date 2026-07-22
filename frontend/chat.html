@@ -4,15 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ReviewLens Ask AI</title>
-    <link rel="stylesheet" href="./styles.css?v=20260709-evidence-room" />
+    <meta
+      name="description"
+      content="Ask questions across customer feedback and get evidence-backed answers."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+    />
+    <link rel="stylesheet" href="./styles.css?v=20260721-alignment" />
   </head>
-  <body>
+  <body class="chat-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="app-shell">
       <aside class="sidebar" aria-label="Primary navigation">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">RL</span>
-          <span>ReviewLens</span>
+          <span class="brand-mark" aria-hidden="true">R</span>
+          <span>ReviewLens <small>Feedback intelligence</small></span>
         </div>
         <nav class="nav-list">
           <a class="nav-item" href="./">
@@ -36,14 +46,64 @@
       </aside>
 
       <main id="main-content" class="main chat-main" tabindex="-1">
-        <section class="chat-layout" aria-label="Review intelligence chatbot">
+        <section class="chat-layout" aria-label="Review intelligence assistant">
+          <aside class="chat-context" aria-label="Chat context and suggestions">
+            <span class="assistant-badge">Ask AI</span>
+            <h1>Investigate customer feedback.</h1>
+            <p>
+              Ask a product question and trace the answer back to retrieved
+              reviews.
+            </p>
+            <div class="context-summary">
+              <span class="context-label">Active source</span>
+              <strong>Instagram app reviews</strong>
+              <span id="contextReviewCount">Loading review index…</span>
+            </div>
+            <div class="prompt-section">
+              <span class="context-label">Suggested investigations</span>
+              <div class="prompt-dock" aria-label="Prompt shortcuts">
+                <button
+                  type="button"
+                  data-prompt="What are the top three product problems users mention most?"
+                >
+                  <span>Explore</span> Top product problems
+                </button>
+                <button
+                  type="button"
+                  data-prompt="What should we put in the next sprint backlog based on review severity?"
+                >
+                  <span>Plan</span> Plan the next sprint
+                </button>
+                <button
+                  type="button"
+                  data-prompt="Summarize the account suspension complaints and cite example reviews."
+                >
+                  <span>Trace</span> Investigate suspensions
+                </button>
+                <button
+                  type="button"
+                  data-prompt="Which issues look like support/process problems rather than engineering bugs?"
+                >
+                  <span>Classify</span> Separate support gaps
+                </button>
+              </div>
+            </div>
+          </aside>
+
           <div class="chat-panel">
+            <header class="chat-toolbar">
+              <div>
+                <span class="status-dot" aria-hidden="true"></span>
+                <strong>ReviewLens AI</strong>
+              </div>
+              <span>Answers include review evidence</span>
+            </header>
             <div class="chat-start-heading">
-              <span class="assistant-badge">ReviewLens AI</span>
-              <h1>Ready when you are.</h1>
+              <span class="chat-start-mark" aria-hidden="true">R</span>
+              <h2>What do you need to understand?</h2>
               <p>
-                Ask ReviewLens anything about Instagram reviews, product pain,
-                sentiment, or backlog priorities.
+                Ask about patterns, severity, product priorities, or a specific
+                issue. ReviewLens will retrieve the most relevant evidence.
               </p>
             </div>
 
@@ -54,47 +114,31 @@
             ></div>
 
             <form id="chatForm" class="chat-form">
-              <label class="sr-only" for="questionInput">Question</label>
-              <textarea
-                id="questionInput"
-                rows="2"
-                placeholder="Ask anything"
-                required
-              ></textarea>
-              <button id="sendQuestion" type="submit">Send</button>
+              <label for="questionInput"
+                >Ask about your customer feedback</label
+              >
+              <div class="composer-row">
+                <textarea
+                  id="questionInput"
+                  rows="1"
+                  placeholder="Ask about themes, severity, or product priorities"
+                  aria-describedby="composerHint chatError"
+                  required
+                ></textarea>
+                <button id="sendQuestion" type="submit">Ask</button>
+              </div>
+              <div class="composer-meta">
+                <span id="composerHint"
+                  >Enter to send · Shift + Enter for a new line</span
+                >
+                <span id="chatError" role="alert"></span>
+              </div>
             </form>
-
-            <div class="prompt-dock" aria-label="Prompt shortcuts">
-              <button
-                type="button"
-                data-prompt="What are the top three product problems users mention most?"
-              >
-                Top problems
-              </button>
-              <button
-                type="button"
-                data-prompt="What should we put in the next sprint backlog based on review severity?"
-              >
-                Sprint backlog
-              </button>
-              <button
-                type="button"
-                data-prompt="Summarize the account suspension complaints and cite example reviews."
-              >
-                Account suspensions
-              </button>
-              <button
-                type="button"
-                data-prompt="Which issues look like support/process problems rather than engineering bugs?"
-              >
-                Support gaps
-              </button>
-            </div>
           </div>
         </section>
       </main>
     </div>
 
-    <script src="./chat.js?v=20260709-evidence-room" defer></script>
+    <script src="./chat.js?v=20260721-alignment" defer></script>
   </body>
 </html>
