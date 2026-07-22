@@ -217,5 +217,8 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Node.js dependencies
+node_modules/
+
 test*.py
 !test_reviewlens_ai_stream.py
