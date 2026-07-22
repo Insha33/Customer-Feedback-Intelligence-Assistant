@@ -23,7 +23,7 @@ Open:
 
 `start:dashboard` refreshes the backlog when possible, builds the static Next.js chat application, and serves both experiences from the Python server.
 
-For chat UI development with hot reload, copy `web/.env.example` to `web/.env.local`, run `npm run dev:chat`, and keep `reviewlens_server.py` running on port 8080.
+For chat UI development with hot reload, copy `web/.env.example` to `web/.env.local`, run `npm run dev:chat`, and keep `sh scripts/run_python.sh -m backend.reviewlens_server` running on port 8080.
 
 ## Ask AI architecture
 
@@ -44,7 +44,7 @@ The server reads configuration from environment variables or the repository `.en
 - `QDRANT_URL` or `QDRANT_CLUSTER_ENDPOINT`
 - `QDRANT_API_KEY` when required by the configured cluster
 
-Optional variables include `OPENROUTER_CHAT_MODEL`, `OPENAI_EMBEDDING_MODEL`, `QDRANT_COLLECTION`, `REVIEWLENS_CORS_ORIGIN`, and the retrieval-limit settings defined in `reviewlens_server.py`.
+Optional variables include `OPENROUTER_CHAT_MODEL`, `OPENAI_EMBEDDING_MODEL`, `QDRANT_COLLECTION`, `REVIEWLENS_CORS_ORIGIN`, and the retrieval-limit settings defined in `backend/reviewlens_server.py`.
 
 ## Verify
 

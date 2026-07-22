@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Pattern
 
-from reviewlens_ai_protocol import (
+from .reviewlens_ai_protocol import (
     ClientDisconnected,
     UIMessageStreamWriter,
     message_text,

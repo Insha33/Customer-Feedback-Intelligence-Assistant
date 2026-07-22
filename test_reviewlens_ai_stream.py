@@ -4,7 +4,7 @@ import re
 import unittest
 from types import SimpleNamespace
 
-from reviewlens_ai_stream import (
+from backend.reviewlens_ai_stream import (
     StreamingChatDependencies,
     retrieval_question,
     stream_chat_response,

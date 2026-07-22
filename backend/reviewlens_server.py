@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from prompts import SYSTEM_PROMPT, build_user_prompt
-from reviewlens_ai_stream import (
+from .reviewlens_ai_stream import (
     StreamingChatDependencies,
     stream_chat_response,
 )
@@ -21,10 +21,12 @@ try:
 except ImportError:
     load_dotenv = None
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 if load_dotenv:
-    load_dotenv()
+    load_dotenv(PROJECT_ROOT / ".env")
 else:
-    env_path = Path(__file__).resolve().parent / ".env"
+    env_path = PROJECT_ROOT / ".env"
 
     if env_path.exists():
         for line in env_path.read_text(encoding="utf-8").splitlines():
@@ -149,7 +151,7 @@ def review_csv_path():
     if REVIEW_CSV.is_absolute():
         return REVIEW_CSV
 
-    return Path(__file__).resolve().parent / REVIEW_CSV
+    return PROJECT_ROOT / REVIEW_CSV
 
 
 def load_review_sqlite():
@@ -769,7 +771,7 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
 
 
 def main():
-    os.chdir(Path(__file__).resolve().parent)
+    os.chdir(PROJECT_ROOT)
     server = ThreadingHTTPServer((HOST, PORT), ReviewLensHandler)
     print(f"ReviewLens running at http://{HOST}:{PORT}/frontend/")
     print(f"Ask AI page running at http://{HOST}:{PORT}{CHAT_APP_PREFIX}/")
