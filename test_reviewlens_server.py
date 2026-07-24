@@ -37,18 +37,35 @@ class ReviewLensServerTests(unittest.TestCase):
         connection.close()
         return response.status, headers, body
 
-    def test_root_redirects_to_canonical_frontend_path(self):
-        status, headers, _body = self.request("/")
+    def test_root_serves_dashboard_with_root_asset_paths(self):
+        status, _headers, body = self.request("/")
 
-        self.assertEqual(status, 307)
-        self.assertEqual(headers["location"], "/frontend/")
+        self.assertEqual(status, 200)
+        self.assertIn(b'href="/styles.css?', body)
+        self.assertIn(b'src="/app.js?', body)
 
-    def test_frontend_stylesheet_is_served(self):
-        status, headers, body = self.request("/frontend/styles.css")
+    def test_root_stylesheet_is_served(self):
+        status, headers, body = self.request("/styles.css")
 
         self.assertEqual(status, 200)
         self.assertTrue(headers["content-type"].startswith("text/css"))
         self.assertIn(b":root", body)
+
+    def test_backlog_serves_page_with_canonical_links(self):
+        status, _headers, body = self.request("/backlog")
+
+        self.assertEqual(status, 200)
+        self.assertIn(b'href="/backlog"', body)
+        self.assertIn(b'src="/backlog.js?', body)
+
+    def test_old_frontend_routes_redirect_to_canonical_paths(self):
+        status, headers, _body = self.request("/frontend/")
+        self.assertEqual(status, 307)
+        self.assertEqual(headers["location"], "/")
+
+        status, headers, _body = self.request("/frontend/backlog.html")
+        self.assertEqual(status, 307)
+        self.assertEqual(headers["location"], "/backlog")
 
 
 if __name__ == "__main__":

@@ -719,9 +719,15 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
                 },
             )
 
-        if parsed.path == "/":
+        if parsed.path in {"/frontend", "/frontend/", "/frontend/index.html"}:
             self.send_response(HTTPStatus.TEMPORARY_REDIRECT)
-            self.send_header("Location", "/frontend/")
+            self.send_header("Location", "/")
+            self.end_headers()
+            return
+
+        if parsed.path == "/frontend/backlog.html":
+            self.send_response(HTTPStatus.TEMPORARY_REDIRECT)
+            self.send_header("Location", "/backlog")
             self.end_headers()
             return
 
@@ -744,7 +750,11 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
                     {"error": "Invalid chat application path."},
                 )
             self.path = f"/web/out/{relative_path}"
-        elif parsed.path == "/backlog":
+        elif parsed.path == "/":
+            self.path = "/frontend/index.html"
+        elif parsed.path in {"/styles.css", "/app.js", "/backlog.js"}:
+            self.path = f"/frontend{parsed.path}"
+        elif parsed.path in {"/backlog", "/backlog/"}:
             self.path = "/frontend/backlog.html"
 
         return super().do_GET()

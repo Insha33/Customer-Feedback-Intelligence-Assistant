@@ -666,7 +666,7 @@ function renderBacklog() {
                         `<span class="chip ${lane === "Must implement" ? "urgent" : ""}">${escapeHtml(category)}</span>`,
                     )
                     .join("")}
-                  <a class="chip chip-link" href="./backlog.html">View details</a>
+                  <a class="chip chip-link" href="/backlog">View details</a>
                 </div>
               </article>
             `,
