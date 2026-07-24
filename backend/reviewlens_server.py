@@ -719,6 +719,12 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
                 },
             )
 
+        if parsed.path == "/":
+            self.send_response(HTTPStatus.TEMPORARY_REDIRECT)
+            self.send_header("Location", "/frontend/")
+            self.end_headers()
+            return
+
         if parsed.path in {"/chat", "/frontend/chat.html"}:
             self.send_response(HTTPStatus.TEMPORARY_REDIRECT)
             self.send_header("Location", f"{CHAT_APP_PREFIX}/")
@@ -738,8 +744,6 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
                     {"error": "Invalid chat application path."},
                 )
             self.path = f"/web/out/{relative_path}"
-        elif parsed.path == "/":
-            self.path = "/frontend/"
         elif parsed.path == "/backlog":
             self.path = "/frontend/backlog.html"
 

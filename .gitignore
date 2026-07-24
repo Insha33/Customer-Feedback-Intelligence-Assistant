@@ -224,3 +224,4 @@ node_modules/
 
 test*.py
 !test_reviewlens_ai_stream.py
+!test_reviewlens_server.py
