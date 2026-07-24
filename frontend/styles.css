@@ -44,7 +44,7 @@ html {
 }
 
 body {
-  min-width: 320px;
+  min-width: 0;
   margin: 0;
   background: var(--canvas);
   color: var(--ink);
@@ -100,7 +100,14 @@ h2,
 h3,
 h4 {
   hyphens: none;
+  overflow-wrap: anywhere;
   text-wrap: balance;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
 }
 
 .skip-link {
@@ -252,7 +259,7 @@ h4 {
 .main {
   width: min(1400px, 100%);
   margin: 0 auto;
-  padding: 48px clamp(20px, 4vw, 64px) 72px;
+  padding: clamp(32px, 4vw, 48px) clamp(16px, 4vw, 64px) clamp(48px, 6vw, 72px);
 }
 
 .topbar {
@@ -662,6 +669,17 @@ h2 {
   transition:
     border-color 220ms var(--ease),
     box-shadow 220ms var(--ease);
+}
+
+.topbar > *,
+.metrics-grid > *,
+.metric-stack > *,
+.analysis-grid > *,
+.signal-grid > *,
+.panel-header > *,
+.backlog-lanes > *,
+.backlog-detail-stack > * {
+  min-width: 0;
 }
 
 .panel:hover {
@@ -1791,7 +1809,7 @@ h2 {
   }
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 67.5em) {
   .sidebar {
     grid-template-columns: 1fr auto;
   }
@@ -1838,7 +1856,7 @@ h2 {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 47.5em) {
   .chat-page {
     overflow: auto;
   }
@@ -1866,6 +1884,8 @@ h2 {
 
   .nav-item {
     min-width: 0;
+    min-height: 48px;
+    padding-inline: 10px;
   }
 
   .main {
@@ -1902,7 +1922,7 @@ h2 {
   }
 
   h1 {
-    font-size: clamp(36px, 11vw, 48px);
+    font-size: clamp(32px, 11vw, 48px);
   }
 
   .controls {
@@ -2042,15 +2062,45 @@ h2 {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 30em) {
   .brand-mark {
     width: 34px;
     height: 34px;
   }
 
   .nav-item {
-    padding-inline: 7px;
+    padding-inline: 5px;
     font-size: 12px;
+  }
+
+  .source-strip {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .source-strip > div {
+    width: 100%;
+  }
+
+  .source-strip strong {
+    white-space: normal;
+  }
+
+  .source-count {
+    align-self: flex-start;
+  }
+
+  .panel-header,
+  .detail-hero,
+  .backlog-detail-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel-link,
+  .back-link {
+    width: fit-content;
+    white-space: normal;
   }
 
   .controls,
@@ -2092,6 +2142,44 @@ h2 {
 
   .chat-form button {
     width: auto;
+  }
+}
+
+@media (max-width: 22.5em) {
+  .sidebar {
+    padding-inline: 10px;
+  }
+
+  .main {
+    padding-inline: 12px;
+  }
+
+  .nav-list {
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .nav-item {
+    padding-inline: 3px;
+    font-size: 11px;
+  }
+
+  .panel,
+  .metric-card {
+    padding: 16px;
+  }
+}
+
+@media (pointer: coarse) {
+  .bar-row,
+  .legend-item,
+  .panel-link,
+  .chip-link {
+    min-height: 48px;
+  }
+
+  .chip-link {
+    padding-inline: 12px;
   }
 }
 

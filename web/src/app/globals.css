@@ -134,7 +134,28 @@
 @media (max-width: 520px) {
   .nav-pill {
     min-width: 62px;
+    min-height: 44px;
     padding-inline: 10px;
     font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav-pill {
+    min-width: 56px;
+    padding-inline: 7px;
+    font-size: 11px;
+  }
+}
+
+@media (pointer: coarse) {
+  .nav-pill {
+    min-height: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-pill {
+    transition-duration: 0.01ms;
   }
 }

@@ -1,10 +1,13 @@
+const OVERVIEW_PATH = "/";
+const BACKLOG_PATH = "/backlog";
+
 export function AppHeader() {
   return (
-    <header className="z-20 flex h-[68px] shrink-0 items-center border-b border-border bg-white/95 px-5 backdrop-blur-xl md:px-10">
+    <header className="z-20 flex h-[68px] shrink-0 items-center border-b border-border bg-white/95 px-2 backdrop-blur-xl min-[380px]:px-3 md:px-10">
       <div className="mx-auto grid w-full max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center">
         <a
           className="flex w-fit items-center gap-3 text-foreground no-underline"
-          href="/frontend/"
+          href={OVERVIEW_PATH}
         >
           <span className="grid size-9 place-items-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
             R
@@ -21,10 +24,10 @@ export function AppHeader() {
           aria-label="Primary navigation"
           className="flex rounded-full border border-border bg-secondary p-1"
         >
-          <a className="nav-pill" href="/frontend/">
+          <a className="nav-pill" href={OVERVIEW_PATH}>
             Overview
           </a>
-          <a className="nav-pill" href="/frontend/backlog.html">
+          <a className="nav-pill" href={BACKLOG_PATH}>
             Backlog
           </a>
           <a
