@@ -4,6 +4,7 @@ import math
 import os
 import re
 import sqlite3
+import threading
 import time
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -65,9 +66,10 @@ DOC_CACHE = {
 }
 SQL_CACHE = {
     "mtime": None,
-    "conn": None,
+    "rows": [],
     "categories": [],
 }
+SQL_CACHE_LOCK = threading.Lock()
 
 
 def json_response(handler, status, payload):
@@ -158,16 +160,42 @@ def review_csv_path():
 
 
 def load_review_sqlite():
-    path = review_csv_path()
+    with SQL_CACHE_LOCK:
+        path = review_csv_path()
 
-    if not path.exists():
-        return None, []
+        if not path.exists():
+            return None, []
 
-    mtime = path.stat().st_mtime
+        mtime = path.stat().st_mtime
 
-    if SQL_CACHE["conn"] is not None and SQL_CACHE["mtime"] == mtime:
-        return SQL_CACHE["conn"], SQL_CACHE["categories"]
+        if SQL_CACHE["mtime"] != mtime:
+            with path.open(newline="", encoding="utf-8") as file:
+                reader = csv.DictReader(file)
+                rows = [
+                    (
+                        row.get("review_id", ""),
+                        row.get("source", ""),
+                        float(row.get("user_rating") or 0),
+                        row.get("review_text", ""),
+                        row.get("category", ""),
+                        row.get("review_date", ""),
+                        (row.get("sentiment") or "").lower(),
+                        float(row.get("quality_score") or 0),
+                    )
+                    for row in reader
+                ]
 
+            SQL_CACHE["mtime"] = mtime
+            SQL_CACHE["rows"] = rows
+            SQL_CACHE["categories"] = sorted(
+                {row[4] for row in rows if row[4]}
+            )
+
+        rows = SQL_CACHE["rows"]
+        categories = SQL_CACHE["categories"]
+
+    # Each HTTP request gets a connection created and consumed in its own
+    # worker thread. Only immutable Python data is shared between threads.
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row
     conn.execute(
@@ -184,23 +212,6 @@ def load_review_sqlite():
         )
         """
     )
-
-    with path.open(newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-        rows = [
-            (
-                row.get("review_id", ""),
-                row.get("source", ""),
-                float(row.get("user_rating") or 0),
-                row.get("review_text", ""),
-                row.get("category", ""),
-                row.get("review_date", ""),
-                (row.get("sentiment") or "").lower(),
-                float(row.get("quality_score") or 0),
-            )
-            for row in reader
-        ]
-
     conn.executemany(
         """
         INSERT INTO reviews (
@@ -218,20 +229,6 @@ def load_review_sqlite():
         rows,
     )
     conn.commit()
-
-    categories = [
-        row["category"]
-        for row in conn.execute(
-            "SELECT DISTINCT category FROM reviews WHERE category != ''"
-        )
-    ]
-
-    if SQL_CACHE["conn"] is not None:
-        SQL_CACHE["conn"].close()
-
-    SQL_CACHE["conn"] = conn
-    SQL_CACHE["mtime"] = mtime
-    SQL_CACHE["categories"] = categories
     return conn, categories
 
 
@@ -352,40 +349,49 @@ def structured_analytics_context(question):
     if conn is None:
         return None
 
-    filters, params, labels = extract_analytics_filters(question, categories)
-    where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
-    total_reviews = fetch_count(conn, "", [])
-    matching_reviews = fetch_count(conn, where_clause, params)
-    avg_rating = conn.execute(
-        f"SELECT AVG(user_rating) AS avg_rating FROM reviews {where_clause}",
-        params,
-    ).fetchone()["avg_rating"]
-    low_rating_count = conn.execute(
-        f"SELECT COUNT(*) AS count FROM reviews {where_clause} {'AND' if where_clause else 'WHERE'} user_rating <= 2",
-        params,
-    ).fetchone()["count"]
+    try:
+        filters, params, labels = extract_analytics_filters(question, categories)
+        where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
+        total_reviews = fetch_count(conn, "", [])
+        matching_reviews = fetch_count(conn, where_clause, params)
+        avg_rating = conn.execute(
+            f"SELECT AVG(user_rating) AS avg_rating FROM reviews {where_clause}",
+            params,
+        ).fetchone()["avg_rating"]
+        low_rating_count = conn.execute(
+            f"SELECT COUNT(*) AS count FROM reviews {where_clause} {'AND' if where_clause else 'WHERE'} user_rating <= 2",
+            params,
+        ).fetchone()["count"]
 
-    sentiment_counts = fetch_group_counts(conn, "sentiment", where_clause, params, 6)
-    category_counts = fetch_group_counts(conn, "category", where_clause, params, 6)
-    source_counts = fetch_group_counts(conn, "source", where_clause, params, 6)
-    matching_share = (
-        f"{round((matching_reviews / total_reviews) * 100)}%"
-        if total_reviews
-        else "0%"
-    )
+        sentiment_counts = fetch_group_counts(
+            conn, "sentiment", where_clause, params, 6
+        )
+        category_counts = fetch_group_counts(
+            conn, "category", where_clause, params, 6
+        )
+        source_counts = fetch_group_counts(
+            conn, "source", where_clause, params, 6
+        )
+        matching_share = (
+            f"{round((matching_reviews / total_reviews) * 100)}%"
+            if total_reviews
+            else "0%"
+        )
 
-    return "\n".join(
-        [
-            "Structured analytics from local review CSV:",
-            f"- Scope filters: {', '.join(labels) if labels else 'all reviews'}",
-            f"- Matching reviews: {matching_reviews} of {total_reviews} ({matching_share})",
-            f"- Average rating: {avg_rating:.2f}" if avg_rating is not None else "- Average rating: n/a",
-            f"- Low-rating reviews (<=2 stars): {low_rating_count}",
-            f"- Sentiment split: {format_group_counts(sentiment_counts)}",
-            f"- Top issue categories: {format_group_counts(category_counts)}",
-            f"- Source split: {format_group_counts(source_counts)}",
-        ]
-    )
+        return "\n".join(
+            [
+                "Structured analytics from local review CSV:",
+                f"- Scope filters: {', '.join(labels) if labels else 'all reviews'}",
+                f"- Matching reviews: {matching_reviews} of {total_reviews} ({matching_share})",
+                f"- Average rating: {avg_rating:.2f}" if avg_rating is not None else "- Average rating: n/a",
+                f"- Low-rating reviews (<=2 stars): {low_rating_count}",
+                f"- Sentiment split: {format_group_counts(sentiment_counts)}",
+                f"- Top issue categories: {format_group_counts(category_counts)}",
+                f"- Source split: {format_group_counts(source_counts)}",
+            ]
+        )
+    finally:
+        conn.close()
 
 
 def point_to_doc(point):
@@ -708,6 +714,7 @@ class ReviewLensHandler(SimpleHTTPRequestHandler):
                     "chat_model": CHAT_MODEL,
                     "chat_provider": "openrouter",
                     "analytics_mode": "sqlite_csv_plus_qdrant_rag",
+                    "sqlite_connection_scope": "request",
                     "qdrant_configured": bool(
                         os.getenv("QDRANT_URL")
                         or os.getenv("QDRANT_CLUSTER_ENDPOINT")
