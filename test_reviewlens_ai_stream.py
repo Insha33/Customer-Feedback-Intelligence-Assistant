@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from backend.reviewlens_ai_stream import (
     StreamingChatDependencies,
     retrieval_question,
+    structured_question,
     stream_chat_response,
 )
 from backend.reviewlens_structured_query import (
@@ -316,6 +317,97 @@ class ReviewLensAIStreamTests(unittest.TestCase):
         self.assertEqual(
             calls,
             {"embedding": 1, "qdrant": 1, "dense": 1, "lexical": 1},
+        )
+
+    def test_self_contained_aggregate_does_not_inherit_previous_filters(self):
+        captured_questions = []
+        dependencies = build_dependencies()
+        aggregate_result = StructuredQueryResult(
+            plan=StructuredQueryPlan(
+                intent="aggregate",
+                aggregation="count",
+                rating=RatingFilter(minimum=4),
+            ),
+            analytics_context="Scope filters: rating>=4",
+            documents=[],
+            applied_filters=("rating>=4",),
+            metrics={
+                "matching_reviews": 32,
+                "total_reviews": 549,
+                "average_rating": 4.91,
+            },
+        )
+
+        def run_structured_query(question):
+            captured_questions.append(question)
+            return aggregate_result
+
+        dependencies = StreamingChatDependencies(
+            **{
+                **dependencies.__dict__,
+                "run_structured_query": run_structured_query,
+                "get_openrouter_client": lambda: self.fail(
+                    "Exact counts should not call a chat model"
+                ),
+                "get_openai_client": lambda: self.fail(
+                    "Exact counts should not call embeddings"
+                ),
+                "get_qdrant_client": lambda: self.fail(
+                    "Exact counts should not call Qdrant"
+                ),
+            }
+        )
+        messages = [
+            {
+                "role": "user",
+                "parts": [
+                    {
+                        "type": "text",
+                        "text": "Mention top reviews with positive sentiment",
+                    }
+                ],
+            },
+            {
+                "role": "assistant",
+                "parts": [{"type": "text", "text": "Here are six reviews."}],
+            },
+            {
+                "role": "user",
+                "parts": [
+                    {"type": "text", "text": "How many 4+ ratings are present?"}
+                ],
+            },
+        ]
+
+        handler = FakeHandler()
+        stream_chat_response(handler, {"messages": messages}, dependencies)
+
+        self.assertEqual(captured_questions, ["How many 4+ ratings are present?"])
+        answer = "".join(
+            event.get("delta", "")
+            for event in parse_stream(handler)
+            if event["type"] == "text-delta"
+        )
+        self.assertEqual(answer, "There are **32 reviews** matching rating>=4.")
+
+    def test_referential_follow_up_can_reuse_previous_question(self):
+        messages = [
+            {
+                "role": "user",
+                "parts": [{"type": "text", "text": "Show positive reviews"}],
+            },
+            {
+                "role": "assistant",
+                "parts": [{"type": "text", "text": "Here they are."}],
+            },
+            {
+                "role": "user",
+                "parts": [{"type": "text", "text": "How many of those?"}],
+            },
+        ]
+        self.assertEqual(
+            structured_question("How many of those?", messages),
+            "Show positive reviews\nFollow-up: How many of those?",
         )
 
     def test_short_follow_up_reuses_previous_user_question(self):

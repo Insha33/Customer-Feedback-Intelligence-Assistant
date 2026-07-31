@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from typing import Any, Callable, Pattern
 
@@ -9,6 +10,7 @@ from .reviewlens_ai_protocol import (
 )
 from .reviewlens_structured_query import (
     StructuredQueryResult,
+    format_aggregate_answer,
     format_review_list_answer,
 )
 
@@ -75,6 +77,12 @@ def retrieval_question(question, messages):
     return f"{previous_questions[-1]}\nFollow-up: {question}"
 
 
+def structured_question(question, messages):
+    if re.search(r"\b(?:those|these|them|same|ones)\b", question, re.IGNORECASE):
+        return retrieval_question(question, messages)
+    return question
+
+
 def stream_model_answer(writer, dependencies, question, docs, analytics_context):
     context = dependencies.build_context(docs)
     user_prompt = dependencies.build_user_prompt(
@@ -126,7 +134,9 @@ def stream_rag_answer(writer, question, messages, dependencies):
         "Looking for counts, ratings, and category-level evidence.",
         "active",
     )
-    structured_result = dependencies.run_structured_query(search_question)
+    structured_result = dependencies.run_structured_query(
+        structured_question(question, messages)
+    )
     analytics_context = (
         structured_result.analytics_context if structured_result else None
     )
@@ -224,8 +234,15 @@ def stream_rag_answer(writer, question, messages, dependencies):
         "Synthesizing the selected evidence into a concise recommendation.",
         "active",
     )
+    aggregate_answer = (
+        format_aggregate_answer(structured_result)
+        if structured_intent == "aggregate"
+        else None
+    )
     if structured_intent == "list_reviews":
         writer.text_delta(format_review_list_answer(structured_result))
+    elif aggregate_answer:
+        writer.text_delta(aggregate_answer)
     else:
         stream_model_answer(
             writer,

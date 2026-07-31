@@ -18,6 +18,7 @@ from .reviewlens_ai_stream import (
 )
 from .reviewlens_structured_query import (
     StructuredQueryResult,
+    format_aggregate_answer,
     format_review_list_answer,
     parse_structured_query,
     sql_filters,
@@ -351,6 +352,11 @@ def run_structured_query(question):
             analytics_context=analytics_context,
             documents=documents,
             applied_filters=tuple(labels),
+            metrics={
+                "matching_reviews": matching_reviews,
+                "total_reviews": total_reviews,
+                "average_rating": avg_rating,
+            },
         )
     finally:
         conn.close()
@@ -625,6 +631,24 @@ def handle_chat(question):
                 "dense_candidates": 0,
                 "lexical_candidates": 0,
                 "returned_contexts": len(fused_docs),
+            },
+        }
+
+    aggregate_answer = (
+        format_aggregate_answer(structured_result)
+        if structured_intent == "aggregate"
+        else None
+    )
+    if aggregate_answer:
+        return {
+            "answer": aggregate_answer,
+            "sources": [],
+            "retrieval": {
+                "mode": retrieval_mode,
+                "structured_analytics_used": True,
+                "dense_candidates": 0,
+                "lexical_candidates": 0,
+                "returned_contexts": 0,
             },
         }
 

@@ -10,7 +10,10 @@ from unittest.mock import patch
 
 from backend import reviewlens_server
 from backend.reviewlens_server import ReviewLensHandler
-from backend.reviewlens_structured_query import parse_structured_query
+from backend.reviewlens_structured_query import (
+    format_aggregate_answer,
+    parse_structured_query,
+)
 
 
 class ReviewLensServerTests(unittest.TestCase):
@@ -143,8 +146,23 @@ class ReviewLensServerTests(unittest.TestCase):
 
         plan = parse_structured_query("How many positive reviews have at least 4 stars?", [])
         self.assertEqual(plan.intent, "aggregate")
+        self.assertEqual(plan.aggregation, "count")
         self.assertEqual(plan.sentiment, "positive")
         self.assertEqual(plan.rating.minimum, 4)
+
+        plan = parse_structured_query(
+            "Show positive reviews\nFollow-up: How many of those?",
+            [],
+        )
+        self.assertEqual(plan.intent, "aggregate")
+        self.assertEqual(plan.aggregation, "count")
+        self.assertEqual(plan.sentiment, "positive")
+
+        plan = parse_structured_query(
+            "Show positive reviews\nFollow-up: How many negative ones?",
+            [],
+        )
+        self.assertEqual(plan.sentiment, "negative")
 
     def test_structured_review_query_returns_only_filtered_sorted_rows(self):
         def reset_sql_cache():
@@ -186,6 +204,53 @@ class ReviewLensServerTests(unittest.TestCase):
                 and doc["payload"]["sentiment"] == "positive"
                 for doc in result.documents
             )
+        )
+
+    def test_exact_aggregate_answers_use_filtered_sql_metrics(self):
+        def reset_sql_cache():
+            with reviewlens_server.SQL_CACHE_LOCK:
+                reviewlens_server.SQL_CACHE.update(
+                    {"mtime": None, "rows": [], "categories": []}
+                )
+
+        csv_content = "\n".join(
+            [
+                "review_id,source,user_rating,review_text,category,review_date,sentiment,quality_score",
+                "one,app_store,5,Excellent,General,2026-07-01,positive,0.9",
+                "two,play_store,4,Useful,Features,2026-07-02,positive,0.8",
+                "three,play_store,3,Fine,General,2026-07-03,neutral,0.7",
+                "four,app_store,1,Broken,Login,2026-07-04,negative,1.0",
+            ]
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            csv_path = Path(directory) / "reviews.csv"
+            csv_path.write_text(csv_content, encoding="utf-8")
+            with patch.object(reviewlens_server, "REVIEW_CSV", csv_path):
+                reset_sql_cache()
+                self.addCleanup(reset_sql_cache)
+
+                count_result = reviewlens_server.run_structured_query(
+                    "How many 4+ ratings are present?"
+                )
+                percentage_result = reviewlens_server.run_structured_query(
+                    "What percentage of reviews have 4+ ratings?"
+                )
+                average_result = reviewlens_server.run_structured_query(
+                    "What is the average rating for positive reviews?"
+                )
+
+        self.assertEqual(
+            format_aggregate_answer(count_result),
+            "There are **2 reviews** matching rating>=4.",
+        )
+        self.assertEqual(
+            format_aggregate_answer(percentage_result),
+            "**2 of 4 reviews (50.0%)** match rating>=4.",
+        )
+        self.assertEqual(
+            format_aggregate_answer(average_result),
+            "The average rating is **4.50/5** across 2 reviews matching sentiment=positive.",
         )
 
 

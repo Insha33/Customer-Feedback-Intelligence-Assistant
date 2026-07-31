@@ -1,5 +1,5 @@
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -49,6 +49,7 @@ class RatingFilter:
 @dataclass(frozen=True)
 class StructuredQueryPlan:
     intent: str
+    aggregation: str | None = None
     sentiment: str | None = None
     source: str | None = None
     category: str | None = None
@@ -66,6 +67,7 @@ class StructuredQueryResult:
     analytics_context: str
     documents: list[dict[str, Any]]
     applied_filters: tuple[str, ...] = ()
+    metrics: dict[str, Any] = field(default_factory=dict)
 
 
 def format_number(value: float) -> str:
@@ -145,42 +147,82 @@ def parse_structured_query(
     default_limit: int = 6,
 ) -> StructuredQueryPlan | None:
     query = (question or "").lower()
-    sentiment = next(
-        (value for value in ("negative", "neutral", "positive") if value in query),
-        None,
-    )
-    category = next(
-        (
-            value
-            for value in sorted(categories, key=len, reverse=True)
-            if value.lower() in query
-        ),
-        None,
-    )
+    intent_query = query.rsplit("follow-up:", 1)[-1].strip()
+
+    def parse_sentiment(text):
+        return next(
+            (
+                value
+                for value in ("negative", "neutral", "positive")
+                if value in text
+            ),
+            None,
+        )
+
+    def parse_category(text):
+        return next(
+            (
+                value
+                for value in sorted(categories, key=len, reverse=True)
+                if value.lower() in text
+            ),
+            None,
+        )
+
+    sentiment = parse_sentiment(intent_query) or parse_sentiment(query)
+    category = parse_category(intent_query) or parse_category(query)
     source_aliases = {
         "app_store": ("app store", "ios", "iphone"),
         "play_store": ("play store", "android", "google play"),
         "meta_forum": ("meta forum", "forum", "community forum"),
     }
-    source_mentions = [
-        source
-        for source, aliases in source_aliases.items()
-        if any(alias in query for alias in aliases)
-    ]
-    comparison = any(
-        term in query for term in ("split", "compare", "versus", " vs ")
-    )
-    source = source_mentions[0] if len(source_mentions) == 1 and not comparison else None
-    rating = parse_rating_filter(query)
+    def parse_source(text):
+        source_mentions = [
+            source
+            for source, aliases in source_aliases.items()
+            if any(alias in text for alias in aliases)
+        ]
+        comparison = any(
+            term in text for term in ("split", "compare", "versus", " vs ")
+        )
+        if len(source_mentions) == 1 and not comparison:
+            return source_mentions[0]
+        return None
+
+    source = parse_source(intent_query) or parse_source(query)
+    rating = parse_rating_filter(intent_query) or parse_rating_filter(query)
     has_filters = any((sentiment, source, category, rating))
     list_request = bool(
         re.search(
             r"\b(?:show|list|mention|give|find)\b.{0,50}\breviews?\b",
-            query,
+            intent_query,
         )
-        or re.search(r"\b(?:top|best|worst)(?:\s+\d+)?\s+reviews?\b", query)
+        or re.search(
+            r"\b(?:top|best|worst)(?:\s+\d+)?\s+reviews?\b",
+            intent_query,
+        )
     )
-    aggregate_request = any(term in query for term in STRUCTURED_TERMS)
+    aggregate_request = any(term in intent_query for term in STRUCTURED_TERMS)
+
+    aggregation = None
+    if any(term in intent_query for term in ("how many", "count")):
+        aggregation = "count"
+    elif any(
+        term in intent_query for term in ("percentage", "percent", "share")
+    ):
+        aggregation = "percentage"
+    elif any(term in intent_query for term in ("average", "avg")):
+        aggregation = "average"
+    elif any(
+        term in intent_query for term in ("breakdown", "distribution", "split")
+    ):
+        aggregation = "breakdown"
+    elif any(
+        term in intent_query for term in ("top category", "top categories")
+    ):
+        aggregation = "category_ranking"
+    elif "compare" in intent_query:
+        aggregation = "comparison"
 
     if list_request:
         intent = "list_reviews"
@@ -193,11 +235,12 @@ def parse_structured_query(
 
     return StructuredQueryPlan(
         intent=intent,
+        aggregation=aggregation,
         sentiment=sentiment,
         source=source,
         category=category,
         rating=rating,
-        limit=parse_limit(query, default_limit),
+        limit=parse_limit(intent_query, default_limit),
     )
 
 
@@ -247,3 +290,30 @@ def format_review_list_answer(result: StructuredQueryResult) -> str:
         suffix = f" _({metadata})_" if metadata else ""
         lines.append(f"- **{rating} stars · {sentiment}** — {review_text}{suffix}")
     return "\n".join(lines)
+
+
+def format_aggregate_answer(result: StructuredQueryResult) -> str | None:
+    aggregation = result.plan.aggregation
+    if aggregation not in {"count", "percentage", "average"}:
+        return None
+
+    matching = int(result.metrics["matching_reviews"])
+    total = int(result.metrics["total_reviews"])
+    filters = ", ".join(result.applied_filters) or "all reviews"
+    if aggregation == "count":
+        noun = "review" if matching == 1 else "reviews"
+        return f"There are **{matching} {noun}** matching {filters}."
+    if aggregation == "percentage":
+        percentage = (matching / total * 100) if total else 0
+        return (
+            f"**{matching} of {total} reviews ({percentage:.1f}%)** "
+            f"match {filters}."
+        )
+
+    average_rating = result.metrics.get("average_rating")
+    if average_rating is None:
+        return f"No reviews matched {filters}, so an average rating is unavailable."
+    return (
+        f"The average rating is **{average_rating:.2f}/5** across "
+        f"{matching} reviews matching {filters}."
+    )
