@@ -42,6 +42,12 @@ export function EvidenceSources({ sources }: EvidenceSourcesProps) {
                     {metadata.sentiment}
                   </span>
                 ) : null}
+                {typeof metadata?.user_rating === "number" ? (
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    {metadata.user_rating} star
+                    {metadata.user_rating === 1 ? "" : "s"}
+                  </span>
+                ) : null}
               </div>
               {metadata?.review_text ? (
                 <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground">

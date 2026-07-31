@@ -14,6 +14,8 @@ export interface ReviewSource {
   category?: string;
   sentiment?: string;
   source?: string;
+  user_rating?: number;
+  quality_score?: number;
   review_date?: string;
   review_text?: string;
 }

@@ -7,6 +7,10 @@ from .reviewlens_ai_protocol import (
     message_text,
     parse_chat_request,
 )
+from .reviewlens_structured_query import (
+    StructuredQueryResult,
+    format_review_list_answer,
+)
 
 
 MAX_HISTORY_MESSAGES = 6
@@ -18,7 +22,7 @@ class StreamingChatDependencies:
     get_openai_client: Callable[[], Any]
     get_openrouter_client: Callable[[], Any]
     get_qdrant_client: Callable[[], Any]
-    structured_analytics_context: Callable[[str], str | None]
+    run_structured_query: Callable[[str], StructuredQueryResult | None]
     embed_query: Callable[[Any, str], list[float]]
     load_qdrant_documents: Callable[[Any], list[dict[str, Any]]]
     dense_search: Callable[[Any, list[float]], list[dict[str, Any]]]
@@ -122,35 +126,72 @@ def stream_rag_answer(writer, question, messages, dependencies):
         "Looking for counts, ratings, and category-level evidence.",
         "active",
     )
-    analytics_context = dependencies.structured_analytics_context(search_question)
+    structured_result = dependencies.run_structured_query(search_question)
+    analytics_context = (
+        structured_result.analytics_context if structured_result else None
+    )
     writer.rag_step(
         "analytics",
         "Product metrics checked",
         (
-            "Relevant structured metrics were added to the answer context."
-            if analytics_context
+            "Applied filters: " + ", ".join(structured_result.applied_filters) + "."
+            if structured_result and structured_result.applied_filters
+            else "Relevant structured metrics were added to the answer context."
+            if structured_result
             else "This question does not require structured metrics."
         ),
         "complete",
     )
 
+    structured_intent = structured_result.plan.intent if structured_result else None
     writer.rag_step(
         "retrieval",
         "Searching customer feedback",
-        "Running semantic and keyword retrieval across indexed reviews.",
+        (
+            "Applying validated filters to the review dataset."
+            if structured_result
+            else "Running semantic and keyword retrieval across indexed reviews."
+        ),
         "active",
     )
-    openai_client = dependencies.get_openai_client()
-    qdrant_client = dependencies.get_qdrant_client()
-    query_vector = dependencies.embed_query(openai_client, search_question)
-    docs = dependencies.load_qdrant_documents(qdrant_client)
-    dense_results = dependencies.dense_search(qdrant_client, query_vector)
-    lexical_results = dependencies.lexical_search(search_question, docs)
+    if structured_intent == "list_reviews":
+        dense_results = []
+        lexical_results = []
+        fused_docs = structured_result.documents
+        retrieval_detail = "Selected exact reviews using validated SQL filters."
+    elif structured_intent == "aggregate":
+        dense_results = []
+        lexical_results = []
+        fused_docs = []
+        retrieval_detail = "Used exact SQL aggregates; no semantic search was needed."
+    elif structured_intent == "semantic_search":
+        dense_results = []
+        candidates = structured_result.documents
+        lexical_results = dependencies.lexical_search(search_question, candidates)
+        fused_docs = (lexical_results or candidates)[: dependencies.retrieval_limit]
+        retrieval_detail = (
+            "Ranked only reviews that satisfy the validated structured filters."
+        )
+    else:
+        openai_client = dependencies.get_openai_client()
+        qdrant_client = dependencies.get_qdrant_client()
+        query_vector = dependencies.embed_query(openai_client, search_question)
+        docs = dependencies.load_qdrant_documents(qdrant_client)
+        dense_results = dependencies.dense_search(qdrant_client, query_vector)
+        lexical_results = dependencies.lexical_search(search_question, docs)
+        fused_docs = dependencies.reciprocal_rank_fusion(
+            [dense_results, lexical_results],
+            dependencies.retrieval_limit,
+        )
+        retrieval_detail = "Ran semantic and keyword retrieval across indexed reviews."
+
     writer.rag_step(
         "retrieval",
         "Customer feedback searched",
         (
-            f"Found {len(dense_results)} semantic and "
+            retrieval_detail
+            if structured_result
+            else f"Found {len(dense_results)} semantic and "
             f"{len(lexical_results)} keyword candidates."
         ),
         "complete",
@@ -161,10 +202,6 @@ def stream_rag_answer(writer, question, messages, dependencies):
         "Ranking the evidence",
         "Combining both result sets and selecting the strongest reviews.",
         "active",
-    )
-    fused_docs = dependencies.reciprocal_rank_fusion(
-        [dense_results, lexical_results],
-        dependencies.retrieval_limit,
     )
     writer.rag_step(
         "ranking",
@@ -187,13 +224,16 @@ def stream_rag_answer(writer, question, messages, dependencies):
         "Synthesizing the selected evidence into a concise recommendation.",
         "active",
     )
-    stream_model_answer(
-        writer,
-        dependencies,
-        prompt_question,
-        fused_docs,
-        analytics_context,
-    )
+    if structured_intent == "list_reviews":
+        writer.text_delta(format_review_list_answer(structured_result))
+    else:
+        stream_model_answer(
+            writer,
+            dependencies,
+            prompt_question,
+            fused_docs,
+            analytics_context,
+        )
     writer.rag_step(
         "answer",
         "Answer grounded",

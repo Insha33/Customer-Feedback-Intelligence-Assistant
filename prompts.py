@@ -44,7 +44,9 @@ Response style:
 - Prefer short bullets over paragraphs.
 - Keep the whole answer under 160 words unless the user explicitly asks for a
   detailed analysis.
-- Use at most 3 of the strongest review examples.
+- Use at most 3 of the strongest review examples unless the user explicitly asks
+  for a specific number or a list of reviews; then cover the requested results
+  supplied in the retrieved context.
 - Include a recommended next step only when the user asks for prioritization,
   roadmap, sprint planning, support process, or root-cause analysis.
 - Do not include a "Product implication" section or phrase.
@@ -67,7 +69,8 @@ Retrieved review context:
 Answer format:
 One direct opening sentence without an "Answer:" heading or prefix.
 
-**What the reviews show:** 2-3 concise bullets without review ids.
+**What the reviews show:** 2-3 concise bullets without review ids, or the
+requested number of bullets when the user explicitly asks for a review list.
 
 Only if the user asks what to do next, add:
 **Next step:** One specific product/support action.

@@ -16,6 +16,12 @@ from .reviewlens_ai_stream import (
     StreamingChatDependencies,
     stream_chat_response,
 )
+from .reviewlens_structured_query import (
+    StructuredQueryResult,
+    format_review_list_answer,
+    parse_structured_query,
+    sql_filters,
+)
 
 try:
     from dotenv import load_dotenv
@@ -233,83 +239,14 @@ def load_review_sqlite():
 
 
 def should_use_structured_analytics(question):
-    query = (question or "").lower()
-    metric_terms = [
-        "how many",
-        "count",
-        "percentage",
-        "percent",
-        "share",
-        "average",
-        "avg",
-        "rating",
-        "top",
-        "most",
-        "least",
-        "breakdown",
-        "distribution",
-        "split",
-        "compare",
-        "category",
-        "categories",
-        "sentiment",
-        "source",
-        "app store",
-        "play store",
-    ]
-
-    return any(term in query for term in metric_terms)
+    return parse_structured_query(question, []) is not None
 
 
 def extract_analytics_filters(question, categories):
-    query = (question or "").lower()
-    filters = []
-    params = []
-    labels = []
-
-    for category in sorted(categories, key=len, reverse=True):
-        if category.lower() in query:
-            filters.append("category = ?")
-            params.append(category)
-            labels.append(f"category={category}")
-            break
-
-    for sentiment in ["negative", "neutral", "positive"]:
-        if sentiment in query:
-            filters.append("sentiment = ?")
-            params.append(sentiment)
-            labels.append(f"sentiment={sentiment}")
-            break
-
-    source_aliases = {
-        "app_store": ["app store", "ios", "iphone"],
-        "play_store": ["play store", "android", "google play"],
-        "meta_forum": ["meta forum", "forum", "community forum"],
-    }
-    source_mentions = [
-        source
-        for source, aliases in source_aliases.items()
-        if any(alias in query for alias in aliases)
-    ]
-    asks_for_source_comparison = any(
-        term in query for term in ["source split", "split", "compare", "versus", " vs "]
-    )
-
-    if len(source_mentions) == 1 and not asks_for_source_comparison:
-        filters.append("source = ?")
-        params.append(source_mentions[0])
-        labels.append(f"source={source_mentions[0]}")
-
-    rating_match = re.search(r"\b([1-5])\s*-?\s*star", query)
-    if rating_match:
-        filters.append("CAST(user_rating AS INTEGER) = ?")
-        params.append(int(rating_match.group(1)))
-        labels.append(f"rating={rating_match.group(1)} star")
-    elif any(term in query for term in ["critical", "low rating", "low-rated"]):
-        filters.append("user_rating <= 2")
-        labels.append("rating<=2")
-
-    return filters, params, labels
+    plan = parse_structured_query(question, categories, RETRIEVAL_LIMIT)
+    if plan is None:
+        return [], [], []
+    return sql_filters(plan)
 
 
 def fetch_count(conn, where_clause, params):
@@ -340,17 +277,17 @@ def format_group_counts(rows):
     return ", ".join(f"{row['label'] or 'Unknown'}: {row['count']}" for row in rows)
 
 
-def structured_analytics_context(question):
-    if not should_use_structured_analytics(question):
-        return None
-
+def run_structured_query(question):
     conn, categories = load_review_sqlite()
 
     if conn is None:
         return None
 
     try:
-        filters, params, labels = extract_analytics_filters(question, categories)
+        plan = parse_structured_query(question, categories, RETRIEVAL_LIMIT)
+        if plan is None:
+            return None
+        filters, params, labels = sql_filters(plan)
         where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
         total_reviews = fetch_count(conn, "", [])
         matching_reviews = fetch_count(conn, where_clause, params)
@@ -378,9 +315,10 @@ def structured_analytics_context(question):
             else "0%"
         )
 
-        return "\n".join(
+        analytics_context = "\n".join(
             [
                 "Structured analytics from local review CSV:",
+                f"- Query intent: {plan.intent}",
                 f"- Scope filters: {', '.join(labels) if labels else 'all reviews'}",
                 f"- Matching reviews: {matching_reviews} of {total_reviews} ({matching_share})",
                 f"- Average rating: {avg_rating:.2f}" if avg_rating is not None else "- Average rating: n/a",
@@ -390,8 +328,48 @@ def structured_analytics_context(question):
                 f"- Source split: {format_group_counts(source_counts)}",
             ]
         )
+
+        documents = []
+        if plan.intent in {"list_reviews", "semantic_search"}:
+            row_limit = plan.limit if plan.intent == "list_reviews" else 50
+            rows = conn.execute(
+                f"""
+                SELECT review_id, source, user_rating, review_text, category,
+                       review_date, sentiment, quality_score
+                FROM reviews
+                {where_clause}
+                ORDER BY user_rating DESC, quality_score DESC,
+                         review_date DESC, review_id ASC
+                LIMIT ?
+                """,
+                [*params, row_limit],
+            ).fetchall()
+            documents = [sqlite_row_to_doc(row) for row in rows]
+
+        return StructuredQueryResult(
+            plan=plan,
+            analytics_context=analytics_context,
+            documents=documents,
+            applied_filters=tuple(labels),
+        )
     finally:
         conn.close()
+
+
+def structured_analytics_context(question):
+    result = run_structured_query(question)
+    return result.analytics_context if result else None
+
+
+def sqlite_row_to_doc(row):
+    payload = dict(row)
+    review_id = str(payload.get("review_id") or "")
+    return {
+        "id": review_id,
+        "point_id": review_id,
+        "payload": payload,
+        "text": payload_text(payload),
+    }
 
 
 def point_to_doc(point):
@@ -535,6 +513,8 @@ def source_summary(doc):
         "category": payload.get("category"),
         "sentiment": payload.get("sentiment"),
         "source": payload.get("source"),
+        "user_rating": payload.get("user_rating"),
+        "quality_score": payload.get("quality_score"),
         "review_date": payload.get("review_date"),
         "review_text": payload.get("review_text"),
     }
@@ -600,18 +580,55 @@ def handle_chat(question):
             },
         }
 
-    openai_client = get_openai_client()
-    openrouter_client = get_openrouter_client()
-    qdrant_client = get_qdrant_client()
-    analytics_context = structured_analytics_context(question)
-    query_vector = embed_query(openai_client, question)
-    docs = load_qdrant_documents(qdrant_client)
-    dense_results = dense_search(qdrant_client, query_vector)
-    lexical_results = lexical_search(question, docs)
-    fused_docs = reciprocal_rank_fusion(
-        [dense_results, lexical_results],
-        RETRIEVAL_LIMIT,
+    structured_result = run_structured_query(question)
+    analytics_context = (
+        structured_result.analytics_context if structured_result else None
     )
+    structured_intent = structured_result.plan.intent if structured_result else None
+
+    if structured_intent == "list_reviews":
+        dense_results = []
+        lexical_results = []
+        fused_docs = structured_result.documents
+        retrieval_mode = "structured_sql_reviews"
+    elif structured_intent == "aggregate":
+        dense_results = []
+        lexical_results = []
+        fused_docs = []
+        retrieval_mode = "structured_sql_only"
+    elif structured_intent == "semantic_search":
+        dense_results = []
+        candidates = structured_result.documents
+        lexical_results = lexical_search(question, candidates)
+        fused_docs = (lexical_results or candidates)[:RETRIEVAL_LIMIT]
+        retrieval_mode = "structured_sql_filtered_lexical"
+    else:
+        openai_client = get_openai_client()
+        qdrant_client = get_qdrant_client()
+        query_vector = embed_query(openai_client, question)
+        docs = load_qdrant_documents(qdrant_client)
+        dense_results = dense_search(qdrant_client, query_vector)
+        lexical_results = lexical_search(question, docs)
+        fused_docs = reciprocal_rank_fusion(
+            [dense_results, lexical_results],
+            RETRIEVAL_LIMIT,
+        )
+        retrieval_mode = "dense_vector_plus_lexical_rrf"
+
+    if structured_intent == "list_reviews":
+        return {
+            "answer": format_review_list_answer(structured_result),
+            "sources": [source_summary(doc) for doc in fused_docs],
+            "retrieval": {
+                "mode": retrieval_mode,
+                "structured_analytics_used": True,
+                "dense_candidates": 0,
+                "lexical_candidates": 0,
+                "returned_contexts": len(fused_docs),
+            },
+        }
+
+    openrouter_client = get_openrouter_client()
 
     if not fused_docs:
         if analytics_context:
@@ -624,7 +641,7 @@ def handle_chat(question):
                 ),
                 "sources": [],
                 "retrieval": {
-                    "mode": "structured_sql_only",
+                    "mode": retrieval_mode,
                     "structured_analytics_used": True,
                     "dense_candidates": len(dense_results),
                     "lexical_candidates": len(lexical_results),
@@ -646,11 +663,7 @@ def handle_chat(question):
         ),
         "sources": [source_summary(doc) for doc in fused_docs],
         "retrieval": {
-            "mode": (
-                "structured_sql_plus_dense_vector_lexical_rrf"
-                if analytics_context
-                else "dense_vector_plus_lexical_rrf"
-            ),
+            "mode": retrieval_mode,
             "structured_analytics_used": bool(analytics_context),
             "dense_candidates": len(dense_results),
             "lexical_candidates": len(lexical_results),
@@ -663,7 +676,7 @@ STREAMING_CHAT_DEPENDENCIES = StreamingChatDependencies(
     get_openai_client=get_openai_client,
     get_openrouter_client=get_openrouter_client,
     get_qdrant_client=get_qdrant_client,
-    structured_analytics_context=structured_analytics_context,
+    run_structured_query=run_structured_query,
     embed_query=embed_query,
     load_qdrant_documents=load_qdrant_documents,
     dense_search=dense_search,

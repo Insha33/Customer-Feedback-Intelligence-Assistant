@@ -9,6 +9,11 @@ from backend.reviewlens_ai_stream import (
     retrieval_question,
     stream_chat_response,
 )
+from backend.reviewlens_structured_query import (
+    RatingFilter,
+    StructuredQueryPlan,
+    StructuredQueryResult,
+)
 
 
 class FakeHandler:
@@ -58,7 +63,7 @@ def build_dependencies():
         get_openai_client=lambda: object(),
         get_openrouter_client=lambda: openrouter,
         get_qdrant_client=lambda: object(),
-        structured_analytics_context=lambda _question: "Metrics",
+        run_structured_query=lambda _question: None,
         embed_query=lambda _client, _question: [0.1],
         load_qdrant_documents=lambda _client: [review],
         dense_search=lambda _client, _vector: [review],
@@ -165,6 +170,153 @@ class ReviewLensAIStreamTests(unittest.TestCase):
             if event["type"] == "text-delta"
         )
         self.assertIn("Ask me about customer pain points", text)
+
+    def test_structured_review_list_skips_unfiltered_retrieval(self):
+        dependencies = build_dependencies()
+        positive_review = {
+            "id": "review-4",
+            "payload": {
+                "review_id": "review-4",
+                "user_rating": 4,
+                "sentiment": "positive",
+                "review_text": "Messaging works reliably.",
+            },
+        }
+        structured_result = StructuredQueryResult(
+            plan=StructuredQueryPlan(
+                intent="list_reviews",
+                sentiment="positive",
+                rating=RatingFilter(minimum=4),
+                limit=6,
+            ),
+            analytics_context="Scope filters: sentiment=positive, rating>=4",
+            documents=[positive_review],
+        )
+        dependencies = StreamingChatDependencies(
+            **{
+                **dependencies.__dict__,
+                "run_structured_query": lambda _question: structured_result,
+                "get_openai_client": lambda: self.fail(
+                    "Structured list should not call embeddings"
+                ),
+                "get_qdrant_client": lambda: self.fail(
+                    "Structured list should not call Qdrant"
+                ),
+                "get_openrouter_client": lambda: self.fail(
+                    "Structured list should not call a chat model"
+                ),
+            }
+        )
+
+        handler = FakeHandler()
+        stream_chat_response(
+            handler,
+            {"question": "Mention top reviews with 4+ ratings and positive sentiment"},
+            dependencies,
+        )
+
+        sources = [
+            event
+            for event in parse_stream(handler)
+            if event["type"] == "source-document"
+        ]
+        self.assertEqual(len(sources), 1)
+        metadata = sources[0]["providerMetadata"]["reviewlens"]
+        self.assertEqual(metadata["user_rating"], 4)
+        self.assertEqual(metadata["sentiment"], "positive")
+
+    def test_filtered_semantic_query_ranks_only_structured_candidates(self):
+        dependencies = build_dependencies()
+        filtered_review = {
+            "id": "review-low",
+            "payload": {
+                "review_id": "review-low",
+                "user_rating": 1,
+                "sentiment": "negative",
+                "review_text": "Login repeatedly fails.",
+            },
+        }
+        structured_result = StructuredQueryResult(
+            plan=StructuredQueryPlan(
+                intent="semantic_search",
+                sentiment="negative",
+                rating=RatingFilter(maximum=2),
+            ),
+            analytics_context="Scope filters: sentiment=negative, rating<=2",
+            documents=[filtered_review],
+            applied_filters=("sentiment=negative", "rating<=2"),
+        )
+        dependencies = StreamingChatDependencies(
+            **{
+                **dependencies.__dict__,
+                "run_structured_query": lambda _question: structured_result,
+                "lexical_search": lambda _question, docs: docs,
+                "get_openai_client": lambda: self.fail(
+                    "Filtered semantic search should not call embeddings"
+                ),
+                "get_qdrant_client": lambda: self.fail(
+                    "Filtered semantic search should not call Qdrant"
+                ),
+            }
+        )
+
+        handler = FakeHandler()
+        stream_chat_response(
+            handler,
+            {"question": "Why do low-rated negative reviews mention login?"},
+            dependencies,
+        )
+
+        sources = [
+            event
+            for event in parse_stream(handler)
+            if event["type"] == "source-document"
+        ]
+        self.assertEqual([source["sourceId"] for source in sources], ["review:review-low"])
+        analytics_step = next(
+            event["data"]
+            for event in parse_stream(handler)
+            if event.get("type") == "data-rag-step"
+            and event["data"]["stepId"] == "analytics"
+            and event["data"]["status"] == "complete"
+        )
+        self.assertIn("sentiment=negative", analytics_step["description"])
+        self.assertIn("rating<=2", analytics_step["description"])
+
+    def test_unstructured_semantic_query_uses_hybrid_retrieval(self):
+        calls = {"embedding": 0, "qdrant": 0, "dense": 0, "lexical": 0}
+        dependencies = build_dependencies()
+
+        def count(name, result):
+            def call(*_args):
+                calls[name] += 1
+                return result
+
+            return call
+
+        review = dependencies.load_qdrant_documents(object())[0]
+        dependencies = StreamingChatDependencies(
+            **{
+                **dependencies.__dict__,
+                "get_openai_client": count("embedding", object()),
+                "get_qdrant_client": count("qdrant", object()),
+                "load_qdrant_documents": lambda _client: [review],
+                "dense_search": count("dense", [review]),
+                "lexical_search": count("lexical", [review]),
+            }
+        )
+
+        handler = FakeHandler()
+        stream_chat_response(
+            handler,
+            {"question": "Why are users reporting account suspensions?"},
+            dependencies,
+        )
+
+        self.assertEqual(
+            calls,
+            {"embedding": 1, "qdrant": 1, "dense": 1, "lexical": 1},
+        )
 
     def test_short_follow_up_reuses_previous_user_question(self):
         messages = [

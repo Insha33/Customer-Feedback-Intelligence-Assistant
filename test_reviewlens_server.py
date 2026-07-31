@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from backend import reviewlens_server
 from backend.reviewlens_server import ReviewLensHandler
+from backend.reviewlens_structured_query import parse_structured_query
 
 
 class ReviewLensServerTests(unittest.TestCase):
@@ -115,6 +116,76 @@ class ReviewLensServerTests(unittest.TestCase):
 
         self.assertTrue(
             all("- Matching reviews: 2 of 2 (100%)" in result for result in results)
+        )
+
+    def test_structured_query_parses_rating_ranges_and_review_limit(self):
+        plan = parse_structured_query(
+            "Mention the top 3 reviews with 4+ ratings and positive sentiments",
+            [],
+        )
+
+        self.assertEqual(plan.intent, "list_reviews")
+        self.assertEqual(plan.sentiment, "positive")
+        self.assertEqual(plan.rating.minimum, 4)
+        self.assertTrue(plan.rating.minimum_inclusive)
+        self.assertEqual(plan.limit, 3)
+
+        plan = parse_structured_query("Show reviews below 3 stars", [])
+        self.assertEqual(plan.rating.maximum, 3)
+        self.assertFalse(plan.rating.maximum_inclusive)
+
+        plan = parse_structured_query("List reviews between 2 and 4 stars", [])
+        self.assertEqual(plan.rating.minimum, 2)
+        self.assertEqual(plan.rating.maximum, 4)
+
+        plan = parse_structured_query("Why do 1-star reviews mention login?", [])
+        self.assertEqual(plan.intent, "semantic_search")
+
+        plan = parse_structured_query("How many positive reviews have at least 4 stars?", [])
+        self.assertEqual(plan.intent, "aggregate")
+        self.assertEqual(plan.sentiment, "positive")
+        self.assertEqual(plan.rating.minimum, 4)
+
+    def test_structured_review_query_returns_only_filtered_sorted_rows(self):
+        def reset_sql_cache():
+            with reviewlens_server.SQL_CACHE_LOCK:
+                reviewlens_server.SQL_CACHE.update(
+                    {"mtime": None, "rows": [], "categories": []}
+                )
+
+        csv_content = "\n".join(
+            [
+                "review_id,source,user_rating,review_text,category,review_date,sentiment,quality_score",
+                "one,app_store,5,Excellent experience,General,2026-07-01,positive,0.7",
+                "two,play_store,4,Useful features,Features,2026-07-02,positive,0.9",
+                "three,play_store,3,Mostly fine,General,2026-07-03,positive,1.0",
+                "four,app_store,5,Broken login,Login,2026-07-04,negative,1.0",
+            ]
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            csv_path = Path(directory) / "reviews.csv"
+            csv_path.write_text(csv_content, encoding="utf-8")
+            with patch.object(reviewlens_server, "REVIEW_CSV", csv_path):
+                reset_sql_cache()
+                self.addCleanup(reset_sql_cache)
+                result = reviewlens_server.run_structured_query(
+                    "Mention the top reviews with 4+ ratings and positive sentiments"
+                )
+
+        self.assertEqual(result.plan.intent, "list_reviews")
+        self.assertEqual(
+            [doc["id"] for doc in result.documents],
+            ["one", "two"],
+        )
+        self.assertIn("rating>=4", result.analytics_context)
+        self.assertIn("sentiment=positive", result.analytics_context)
+        self.assertTrue(
+            all(
+                doc["payload"]["user_rating"] >= 4
+                and doc["payload"]["sentiment"] == "positive"
+                for doc in result.documents
+            )
         )
 
 
