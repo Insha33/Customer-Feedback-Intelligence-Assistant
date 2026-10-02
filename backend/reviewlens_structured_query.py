@@ -202,32 +202,33 @@ def parse_structured_query(
             intent_query,
         )
     )
-    aggregate_request = any(term in intent_query for term in STRUCTURED_TERMS)
+    aggregate_terms = {
+        term
+        for term in STRUCTURED_TERMS
+        if re.search(r"\b" + re.escape(term) + r"\b", intent_query)
+    }
+    aggregate_request = bool(aggregate_terms)
 
     aggregation = None
-    if any(term in intent_query for term in ("how many", "count")):
+    if aggregate_terms & {"how many", "count"}:
         aggregation = "count"
-    elif any(
-        term in intent_query for term in ("percentage", "percent", "share")
-    ):
+    elif aggregate_terms & {"percentage", "percent", "share"}:
         aggregation = "percentage"
-    elif any(term in intent_query for term in ("average", "avg")):
+    elif aggregate_terms & {"average", "avg"}:
         aggregation = "average"
-    elif any(
-        term in intent_query for term in ("breakdown", "distribution", "split")
-    ):
+    elif aggregate_terms & {"breakdown", "distribution", "split"}:
         aggregation = "breakdown"
-    elif any(
-        term in intent_query for term in ("top category", "top categories")
-    ):
+    elif aggregate_terms & {"top category", "top categories"}:
         aggregation = "category_ranking"
-    elif "compare" in intent_query:
+    elif "compare" in aggregate_terms:
         aggregation = "comparison"
 
-    if list_request:
-        intent = "list_reviews"
-    elif aggregate_request:
+    # A metric request can also contain "give/show ... reviews". Resolve the
+    # explicit aggregation first so it is not mistaken for review examples.
+    if aggregate_request:
         intent = "aggregate"
+    elif list_request:
+        intent = "list_reviews"
     elif has_filters:
         intent = "semantic_search"
     else:

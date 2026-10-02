@@ -9,11 +9,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 from backend import reviewlens_server
+from backend.reviewlens_ai_stream import StreamingChatDependencies, stream_chat_response
 from backend.reviewlens_server import ReviewLensHandler
 from backend.reviewlens_structured_query import (
     format_aggregate_answer,
     parse_structured_query,
 )
+from test_reviewlens_ai_stream import FakeHandler, build_dependencies, parse_stream
 
 
 class ReviewLensServerTests(unittest.TestCase):
@@ -163,6 +165,70 @@ class ReviewLensServerTests(unittest.TestCase):
             [],
         )
         self.assertEqual(plan.sentiment, "negative")
+
+    def test_metric_requests_take_priority_over_review_list_wording(self):
+        for question, aggregation in (
+            ("give me percentage of negative reviews", "percentage"),
+            ("Show me the percent of positive reviews", "percentage"),
+            ("Give me the share of neutral reviews", "percentage"),
+            ("Give me the count of negative reviews", "count"),
+            ("Show the average rating of negative reviews", "average"),
+            ("Show negative reviews\nFollow-up: give me percentage of those reviews", "percentage"),
+        ):
+            with self.subTest(question=question):
+                plan = parse_structured_query(question, [])
+                self.assertEqual(plan.intent, "aggregate")
+                self.assertEqual(plan.aggregation, aggregation)
+
+        for question in (
+            "Give me negative reviews",
+            "Show reviews about account suspension",
+            "List reviews mentioning discounts",
+        ):
+            with self.subTest(question=question):
+                self.assertEqual(parse_structured_query(question, []).intent, "list_reviews")
+
+    def test_negative_percentage_returns_sql_answer_without_examples(self):
+        def reset_sql_cache():
+            with reviewlens_server.SQL_CACHE_LOCK:
+                reviewlens_server.SQL_CACHE.update(
+                    {"mtime": None, "rows": [], "categories": []}
+                )
+
+        question = "give me percentage of negative reviews"
+        csv_content = "\n".join([
+            "review_id,source,user_rating,review_text,category,review_date,sentiment,quality_score",
+            "one,app_store,5,Excellent,General,2026-07-01,positive,0.9",
+            "two,play_store,4,Useful,General,2026-07-02,positive,0.8",
+            "three,play_store,3,Fine,General,2026-07-03,neutral,0.7",
+            "four,app_store,5,Account suspended,Login,2026-07-04,negative,1.0",
+        ])
+        expected = "**1 of 4 reviews (25.0%)** match sentiment=negative."
+        with tempfile.TemporaryDirectory() as directory:
+            csv_path = Path(directory) / "reviews.csv"
+            csv_path.write_text(csv_content, encoding="utf-8")
+            with patch.object(reviewlens_server, "REVIEW_CSV", csv_path):
+                reset_sql_cache()
+                self.addCleanup(reset_sql_cache)
+                with patch.object(reviewlens_server, "get_openai_client", side_effect=AssertionError("Unexpected embeddings")), patch.object(reviewlens_server, "get_openrouter_client", side_effect=AssertionError("Unexpected LLM")):
+                    response = reviewlens_server.handle_chat(question)
+                self.assertEqual(response["answer"], expected)
+                self.assertEqual(response["sources"], [])
+                self.assertEqual(response["retrieval"]["mode"], "structured_sql_only")
+
+                dependencies = StreamingChatDependencies(**{
+                    **build_dependencies().__dict__,
+                    "run_structured_query": reviewlens_server.run_structured_query,
+                    "get_openai_client": lambda: self.fail("Unexpected embeddings"),
+                    "get_openrouter_client": lambda: self.fail("Unexpected LLM"),
+                    "get_qdrant_client": lambda: self.fail("Unexpected vector search"),
+                })
+                handler = FakeHandler()
+                stream_chat_response(handler, {"question": question}, dependencies)
+                events = parse_stream(handler)
+                answer = "".join(event["delta"] for event in events if event["type"] == "text-delta")
+                self.assertEqual(answer, expected)
+                self.assertFalse(any(event["type"] == "source-document" for event in events))
 
     def test_structured_review_query_returns_only_filtered_sorted_rows(self):
         def reset_sql_cache():
